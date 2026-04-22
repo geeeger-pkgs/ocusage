@@ -41,7 +41,8 @@
   "files": [
     "cli.mjs",
     "db.mjs",
-    "report.mjs"
+    "report.mjs",
+    "LICENSE"
   ],
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",

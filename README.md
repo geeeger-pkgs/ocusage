@@ -66,7 +66,7 @@ report.mjs   — 表格 / JSON 格式化输出 / Table and JSON formatting
 
 ## 要求 / Requirements
 
-- Node.js >= 18
+- Node.js >= 20
 - [OpenCode](https://opencode.ai) 已安装并使用过 / Installed and used at least once
 
 ## License

@@ -17,8 +17,8 @@ program
   .option("-d, --date <YYYY-MM-DD>", "date to query", new Date().toISOString().slice(0, 10))
   .option("--db <path>", "path to opencode.db")
   .option("-j, --json", "output as JSON instead of tables")
-  .action((opts) => {
-    const db = openDB(opts.db);
+  .action(async (opts) => {
+    const db = await openDB(opts.db);
     const stats = getDailyStats(db, opts.date);
     db.close();
     printReport(stats, { json: opts.json });

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1](https://github.com/geeeger-pkgs/ocusage/compare/v1.3.0...v1.3.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* auto-publish to npm on release by combining into release-please workflow ([84cc973](https://github.com/geeeger-pkgs/ocusage/commit/84cc973a96465840b6461f4a440870e0ef3128ba))
+
 ## [1.3.0](https://github.com/geeeger-pkgs/ocusage/compare/v1.2.0...v1.3.0) (2026-04-22)
 
 

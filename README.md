@@ -18,9 +18,9 @@ npm install -g @geeeger/ocusage
 node cli.mjs
 ```
 
-> 依赖 `better-sqlite3`（原生 C++ 模块），需要 C++ 编译工具链。
+> 使用 `sql.js`（WASM），无需编译工具链，跨平台即装即用。
 >
-> Requires `better-sqlite3` (native addon) — a C++ toolchain is needed for installation.
+> Uses `sql.js` (WASM) — no native compilation needed, works everywhere.
 
 ## 使用 / Usage
 

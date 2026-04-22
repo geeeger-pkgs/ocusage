@@ -6,8 +6,8 @@ import { createTestDB, seedTypicalDay, insertSession, insertMessage, DAY } from 
 describe("getDailyStats", () => {
   let db;
 
-  beforeEach(() => {
-    db = createTestDB();
+  beforeEach(async () => {
+    db = await createTestDB();
   });
 
   it("returns empty stats for a day with no data", () => {
@@ -89,8 +89,8 @@ describe("getDailyStats", () => {
 
   it("handles malformed message data gracefully", () => {
     insertSession(db, "s1", "/project");
-    db.prepare("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)")
-      .run("m-bad", "s1", "not-json", DAY["2025-04-20"].start + 1000);
+    db.run("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)",
+      ["m-bad", "s1", "not-json", DAY["2025-04-20"].start + 1000]);
 
     const result = getDailyStats(db, "2025-04-20");
     assert.equal(result.total.requests, 0);

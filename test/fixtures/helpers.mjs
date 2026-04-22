@@ -1,9 +1,10 @@
-import Database from "better-sqlite3";
+import initSqlJs from "sql.js";
 
-export function createTestDB() {
-  const db = new Database(":memory:");
+export async function createTestDB() {
+  const SQL = await initSqlJs();
+  const db = new SQL.Database();
 
-  db.exec(`
+  db.run(`
     CREATE TABLE session (
       id TEXT PRIMARY KEY,
       directory TEXT
@@ -26,19 +27,19 @@ export function createTestDB() {
 }
 
 export function insertSession(db, id, directory) {
-  db.prepare("INSERT INTO session (id, directory) VALUES (?, ?)").run(id, directory || null);
+  db.run("INSERT INTO session (id, directory) VALUES (?, ?)", [id, directory || null]);
 }
 
 export function insertMessage(db, { id, sessionId, role, modelID, providerID, tokens, timeCreated }) {
   const data = JSON.stringify({ role, modelID, providerID, tokens });
-  db.prepare("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)")
-    .run(id, sessionId, data, timeCreated);
+  db.run("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)",
+    [id, sessionId, data, timeCreated]);
 }
 
 export function insertPart(db, { id, messageId, type, timeCreated }) {
   const data = JSON.stringify({ type });
-  db.prepare("INSERT INTO part (id, message_id, data, time_created) VALUES (?, ?, ?, ?)")
-    .run(id, messageId, data, timeCreated);
+  db.run("INSERT INTO part (id, message_id, data, time_created) VALUES (?, ?, ?, ?)",
+    [id, messageId, data, timeCreated]);
 }
 
 export const DAY = {

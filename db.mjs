@@ -1,5 +1,4 @@
-import initSqlJs from "sql.js";
-import { readFileSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
 import { join } from "node:path";
 import { homedir } from "node:os";
 import { existsSync } from "node:fs";
@@ -11,7 +10,7 @@ const DEFAULT_DB_PATH = join(
   "opencode.db"
 );
 
-export async function openDB(dbPath) {
+export function openDB(dbPath) {
   const path = dbPath || DEFAULT_DB_PATH;
   if (!existsSync(path)) {
     console.error(`Database not found: ${path}`);
@@ -20,20 +19,9 @@ export async function openDB(dbPath) {
     );
     process.exit(1);
   }
-  const SQL = await initSqlJs();
-  const buffer = readFileSync(path);
-  return new SQL.Database(buffer);
-}
-
-function queryAll(db, sql, params) {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  const results = [];
-  while (stmt.step()) {
-    results.push(stmt.getAsObject());
-  }
-  stmt.free();
-  return results;
+  const db = new DatabaseSync(path);
+  db.exec("PRAGMA journal_mode=WAL");
+  return db;
 }
 
 export function getDailyStats(db, dateStr) {
@@ -42,22 +30,22 @@ export function getDailyStats(db, dateStr) {
   const startMs = Date.UTC(y, m - 1, d, 0, 0, 0);
   const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999);
 
-  const messages = queryAll(
-    db,
-    `SELECT m.id, m.data, s.directory
-     FROM message m
-     LEFT JOIN session s ON m.session_id = s.id
-     WHERE m.time_created >= ? AND m.time_created <= ?`,
-    [startMs, endMs]
-  );
+  const messages = db
+    .prepare(
+      `SELECT m.id, m.data, s.directory
+       FROM message m
+       LEFT JOIN session s ON m.session_id = s.id
+       WHERE m.time_created >= ? AND m.time_created <= ?`
+    )
+    .all(startMs, endMs);
 
-  const parts = queryAll(
-    db,
-    `SELECT p.message_id, p.data
-     FROM part p
-     WHERE p.time_created >= ? AND p.time_created <= ?`,
-    [startMs, endMs]
-  );
+  const parts = db
+    .prepare(
+      `SELECT p.message_id, p.data
+       FROM part p
+       WHERE p.time_created >= ? AND p.time_created <= ?`
+    )
+    .all(startMs, endMs);
 
   const toolCallCount = new Map();
   for (const part of parts) {

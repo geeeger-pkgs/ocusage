@@ -23,7 +23,7 @@ node cli.mjs --json              # JSON output instead of tables
 ## Key facts
 
 - Reads the OpenCode SQLite DB directly; DB must already exist (created by OpenCode itself)
-- Uses `better-sqlite3` (native addon) — requires a C++ toolchain to install
-- Node >= 20 required
+- Uses `node:sqlite` (Node.js built-in) — zero external dependencies, supports WAL mode
+- Node >= 22.5.0 required
 - No tests, no lint, no CI
 - UI strings are in Chinese (表头、分隔符等)

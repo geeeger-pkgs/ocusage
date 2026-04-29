@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0](https://github.com/geeeger-pkgs/ocusage/compare/v1.3.2...v2.0.0) (2026-04-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* requires Node.js >= 22.5.0 (was >= 20.0.0)
+
+### Features
+
+* replace sql.js with node:sqlite for WAL mode support ([18d33a6](https://github.com/geeeger-pkgs/ocusage/commit/18d33a6f87c99b704653a62de8447735cf4a03b6))
+
 ## [1.3.2](https://github.com/geeeger-pkgs/ocusage/compare/v1.3.1...v1.3.2) (2026-04-22)
 
 

@@ -1,10 +1,9 @@
-import initSqlJs from "sql.js";
+import { DatabaseSync } from "node:sqlite";
 
-export async function createTestDB() {
-  const SQL = await initSqlJs();
-  const db = new SQL.Database();
+export function createTestDB() {
+  const db = new DatabaseSync(":memory:");
 
-  db.run(`
+  db.exec(`
     CREATE TABLE session (
       id TEXT PRIMARY KEY,
       directory TEXT
@@ -27,19 +26,19 @@ export async function createTestDB() {
 }
 
 export function insertSession(db, id, directory) {
-  db.run("INSERT INTO session (id, directory) VALUES (?, ?)", [id, directory || null]);
+  db.prepare("INSERT INTO session (id, directory) VALUES (?, ?)").run(id, directory || null);
 }
 
 export function insertMessage(db, { id, sessionId, role, modelID, providerID, tokens, timeCreated }) {
   const data = JSON.stringify({ role, modelID, providerID, tokens });
-  db.run("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)",
-    [id, sessionId, data, timeCreated]);
+  db.prepare("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)")
+    .run(id, sessionId, data, timeCreated);
 }
 
 export function insertPart(db, { id, messageId, type, timeCreated }) {
   const data = JSON.stringify({ type });
-  db.run("INSERT INTO part (id, message_id, data, time_created) VALUES (?, ?, ?, ?)",
-    [id, messageId, data, timeCreated]);
+  db.prepare("INSERT INTO part (id, message_id, data, time_created) VALUES (?, ?, ?, ?)")
+    .run(id, messageId, data, timeCreated);
 }
 
 export const DAY = {

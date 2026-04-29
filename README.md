@@ -18,9 +18,9 @@ npm install -g @geeeger/ocusage
 node cli.mjs
 ```
 
-> 使用 `sql.js`（WASM），无需编译工具链，跨平台即装即用。
+> 使用 Node.js 内置 `node:sqlite` 模块，零外部依赖，支持 WAL 模式实时读取。
 >
-> Uses `sql.js` (WASM) — no native compilation needed, works everywhere.
+> Uses Node.js built-in `node:sqlite` module — zero external dependencies, supports WAL mode for live reading.
 
 ## 使用 / Usage
 
@@ -66,7 +66,7 @@ report.mjs   — 表格 / JSON 格式化输出 / Table and JSON formatting
 
 ## 要求 / Requirements
 
-- Node.js >= 20
+- Node.js >= 22.5.0
 - [OpenCode](https://opencode.ai) 已安装并使用过 / Installed and used at least once
 
 ## License

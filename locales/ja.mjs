@@ -32,6 +32,11 @@ export default {
   mdByProject: "### プロジェクト別",
   mdByProvider: "### プロバイダー別",
 
+  compareTitle: "📊 比較: {a} vs {b}",
+  diff: "差分",
+  changeRate: "変化率",
+  invalidPeriod: '期間の形式が無効です: "{value}"、YYYY-MM または YYYY-MM-DD 形式を使用してください',
+
   invalidDateFormat: '日付形式が無効です: "{value}"、YYYY-MM-DD形式を使用してください',
   dateNotExist: '存在しない日付です: "{value}"',
   startAfterEnd: "開始日が終了日より後です: {from} > {to}",

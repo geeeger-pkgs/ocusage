@@ -32,6 +32,11 @@ export default {
   mdByProject: "### 按專案",
   mdByProvider: "### 按供應商",
 
+  compareTitle: "📊 對比: {a} vs {b}",
+  diff: "差值",
+  changeRate: "變化率",
+  invalidPeriod: '時段格式無效: "{value}"，請使用 YYYY-MM 或 YYYY-MM-DD 格式',
+
   invalidDateFormat: '日期格式無效: "{value}"，請使用 YYYY-MM-DD 格式',
   dateNotExist: '日期不存在: "{value}"',
   startAfterEnd: "起始日期不能晚於結束日期: {from} > {to}",

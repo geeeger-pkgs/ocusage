@@ -300,3 +300,133 @@ export function printReport(stats, opts = {}) {
   }
   console.log(t4.toString());
 }
+
+export function formatDiff(a, b) {
+  const diff = b - a;
+  if (diff === 0) return "+0";
+  const prefix = diff > 0 ? "+" : "-";
+  return prefix + formatNumber(Math.abs(diff));
+}
+
+export function formatChangeRate(a, b) {
+  if (a === 0 && b === 0) return "0%";
+  if (a === 0) return "N/A";
+  const rate = ((b - a) / a) * 100;
+  const prefix = rate >= 0 ? "+" : "";
+  return `${prefix}${rate.toFixed(1)}%`;
+}
+
+const COMPARE_FIELDS = () => [
+  ["requests", t("requests")],
+  ["inputTokens", t("inputTokens")],
+  ["outputTokens", t("outputTokens")],
+  ["toolCalls", t("toolCalls")],
+  ["cacheRead", t("cacheRead")],
+  ["cacheWrite", t("cacheWrite")],
+  ["totalTokens", t("totalTokens")],
+];
+
+function compareGrouped(mapA, mapB, groupTitle, nameHeader) {
+  const allKeys = new Set([...mapA.keys(), ...mapB.keys()]);
+  const emptyStat = () => ({
+    requests: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    toolCalls: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    totalTokens: 0,
+  });
+
+  console.log(chalk.bold(`\n${groupTitle}`));
+  const tbl = makeTable([nameHeader, "A", "B", t("diff"), t("changeRate")]);
+  for (const key of allKeys) {
+    const sA = mapA.get(key) || emptyStat();
+    const sB = mapB.get(key) || emptyStat();
+    if (isAllZero(sA) && isAllZero(sB)) continue;
+    tbl.push([
+      chalk.cyan(key),
+      formatNumber(sA.totalTokens),
+      formatNumber(sB.totalTokens),
+      formatDiff(sA.totalTokens, sB.totalTokens),
+      formatChangeRate(sA.totalTokens, sB.totalTokens),
+    ]);
+  }
+  console.log(tbl.toString());
+}
+
+export function printCompareReport(statsA, statsB, opts = {}) {
+  const format = opts.format || "table";
+  const labelA = opts.labelA || statsA.date;
+  const labelB = opts.labelB || statsB.date;
+
+  if (format === "json") {
+    const diff = {};
+    const changeRate = {};
+    for (const [field] of COMPARE_FIELDS()) {
+      diff[field] = statsB.total[field] - statsA.total[field];
+      changeRate[field] =
+        statsA.total[field] === 0 && statsB.total[field] === 0
+          ? "0%"
+          : statsA.total[field] === 0
+            ? "N/A"
+            : `${(((statsB.total[field] - statsA.total[field]) / statsA.total[field]) * 100).toFixed(1)}%`;
+    }
+    console.log(
+      JSON.stringify(
+        {
+          labelA,
+          labelB,
+          statsA: statsA.total,
+          statsB: statsB.total,
+          diff,
+          changeRate,
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (format === "csv") {
+    console.log(["metric", labelA, labelB, t("diff"), t("changeRate")].join(","));
+    for (const [field, label] of COMPARE_FIELDS()) {
+      const a = statsA.total[field];
+      const b = statsB.total[field];
+      console.log([label, a, b, b - a, formatChangeRate(a, b)].join(","));
+    }
+    return;
+  }
+
+  if (format === "markdown") {
+    console.log(t("compareTitle", { a: labelA, b: labelB }));
+    console.log();
+    console.log(`| | ${labelA} | ${labelB} | ${t("diff")} | ${t("changeRate")} |`);
+    console.log("|---|---|---|---|---|");
+    for (const [field, label] of COMPARE_FIELDS()) {
+      const a = statsA.total[field];
+      const b = statsB.total[field];
+      console.log(
+        `| ${label} | ${formatNumber(a)} | ${formatNumber(b)} | ${formatDiff(a, b)} | ${formatChangeRate(a, b)} |`,
+      );
+    }
+    return;
+  }
+
+  // table format (default)
+  console.log(chalk.bold(t("compareTitle", { a: labelA, b: labelB })));
+
+  const tbl = makeTable(["", labelA, labelB, t("diff"), t("changeRate")]);
+  for (const [field, label] of COMPARE_FIELDS()) {
+    const a = statsA.total[field];
+    const b = statsB.total[field];
+    tbl.push([chalk.cyan(label), formatNumber(a), formatNumber(b), formatDiff(a, b), formatChangeRate(a, b)]);
+  }
+  console.log(tbl.toString());
+
+  // Grouped comparisons
+  compareGrouped(statsA.byModel, statsB.byModel, `📊 ${t("byModelTitle")}`.replace("📊 ", ""), t("model"));
+  compareGrouped(statsA.byProject, statsB.byProject, `📊 ${t("byProjectTitle")}`.replace("📊 ", ""), t("project"));
+  compareGrouped(statsA.byProvider, statsB.byProvider, `📊 ${t("byProviderTitle")}`.replace("📊 ", ""), t("provider"));
+}

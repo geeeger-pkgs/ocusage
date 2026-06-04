@@ -38,6 +38,12 @@ export default {
   mdByProject: "### 按项目",
   mdByProvider: "### 按供应商",
 
+  // 对比功能
+  compareTitle: "📊 对比: {a} vs {b}",
+  diff: "差值",
+  changeRate: "变化率",
+  invalidPeriod: '时段格式无效: "{value}"，请使用 YYYY-MM 或 YYYY-MM-DD 格式',
+
   // 错误信息
   invalidDateFormat: '日期格式无效: "{value}"，请使用 YYYY-MM-DD 格式',
   dateNotExist: '日期不存在: "{value}"',

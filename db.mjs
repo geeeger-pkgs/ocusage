@@ -166,3 +166,23 @@ export function getDateRangeStats(db, fromDate, toDate) {
   const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
   return { total, byModel, byProject, byProvider, date: `${fromDate} ~ ${toDate}` };
 }
+
+export function parsePeriod(period) {
+  // YYYY-MM-DD 格式
+  if (/^\d{4}-\d{2}-\d{2}$/.test(period)) {
+    validateDate(period);
+    return { from: period, to: period };
+  }
+  // YYYY-MM 格式
+  if (/^\d{4}-\d{2}$/.test(period)) {
+    const [y, m] = period.split("-").map(Number);
+    if (m < 1 || m > 12) {
+      throw new Error(t("invalidPeriod", { value: period }));
+    }
+    const from = `${period}-01`;
+    const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const to = `${period}-${String(lastDay).padStart(2, "0")}`;
+    return { from, to };
+  }
+  throw new Error(t("invalidPeriod", { value: period }));
+}

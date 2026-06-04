@@ -50,6 +50,12 @@ ocusage --lang en                 # English
 ocusage --lang zh-TW              # 繁體中文
 ocusage --lang ja                 # 日本語
 ocusage --lang ko                 # 한국어
+
+# 数据对比 / Compare periods
+ocusage compare --a 2025-04 --b 2025-05            # 月对比 / Monthly
+ocusage compare --a 2025-04-01 --b 2025-04-02      # 日对比 / Daily
+ocusage compare --a 2025-04 --b 2025-05 --json     # JSON 格式输出
+ocusage compare --a 2025-04 --b 2025-05 --lang en  # English output
 ```
 
 首次运行前确保 [OpenCode](https://opencode.ai) 已使用过至少一次。数据库默认位于：
@@ -82,11 +88,25 @@ Make sure OpenCode has been used at least once. Database default location:
 └────────────┴────────────┴────────────┴──────────┴──────────┴──────────┴────────────┘
 ```
 
+### 对比输出 / Compare Output
+
+```
+📊 对比: 2025-04 vs 2025-05
+┌──────────────┬─────────┬─────────┬────────┬────────┐
+│              │ 2025-04 │ 2025-05 │ 差值   │ 变化率  │
+├──────────────┼─────────┼─────────┼────────┼────────┤
+│ 今日总请求数  │ 120     │ 150     │ +30    │ +25.0% │
+│ 输入Tokens   │ 50.2K   │ 62.8K   │ +12.6K │ +25.1% │
+│ 输出Tokens   │ 15.1K   │ 18.3K   │ +3.2K  │ +21.2% │
+│ 总计Tokens   │ 80.5K   │ 96.4K   │ +15.9K │ +19.8% │
+└──────────────┴─────────┴─────────┴────────┴────────┘
+```
+
 ## 项目结构 / Project Structure
 
 ```
 cli.mjs      — 入口，参数解析 / Entry point, argument parsing
-db.mjs       — 数据库读取与统计 / DB access and aggregation
+db.mjs       — 数据库读取与统计、时段解析 / DB access, aggregation, period parsing
 report.mjs   — 多格式输出 / Multi-format output (table/JSON/CSV/Markdown)
 i18n.mjs     — 国际化 / Internationalization
 locales/     — 翻译文件 / Translation files (zh-CN, zh-TW, en, ja, ko)

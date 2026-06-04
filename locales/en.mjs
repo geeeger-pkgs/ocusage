@@ -32,6 +32,11 @@ export default {
   mdByProject: "### By Project",
   mdByProvider: "### By Provider",
 
+  compareTitle: "📊 Compare: {a} vs {b}",
+  diff: "Diff",
+  changeRate: "Change",
+  invalidPeriod: 'Invalid period format: "{value}", please use YYYY-MM or YYYY-MM-DD',
+
   invalidDateFormat: 'Invalid date format: "{value}", please use YYYY-MM-DD',
   dateNotExist: 'Date does not exist: "{value}"',
   startAfterEnd: "Start date cannot be after end date: {from} > {to}",

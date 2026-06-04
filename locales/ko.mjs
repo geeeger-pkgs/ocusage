@@ -32,6 +32,11 @@ export default {
   mdByProject: "### 프로젝트별",
   mdByProvider: "### 제공자별",
 
+  compareTitle: "📊 비교: {a} vs {b}",
+  diff: "차이",
+  changeRate: "변화율",
+  invalidPeriod: '기간 형식이 잘못되었습니다: "{value}", YYYY-MM 또는 YYYY-MM-DD 형식을 사용하세요',
+
   invalidDateFormat: '날짜 형식이 잘못되었습니다: "{value}", YYYY-MM-DD 형식을 사용하세요',
   dateNotExist: '존재하지 않는 날짜입니다: "{value}"',
   startAfterEnd: "시작 날짜가 종료 날짜보다 늦습니다: {from} > {to}",

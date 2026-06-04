@@ -25,5 +25,5 @@ node cli.mjs --json              # JSON output instead of tables
 - Reads the OpenCode SQLite DB directly; DB must already exist (created by OpenCode itself)
 - Uses `node:sqlite` (Node.js built-in) — zero external dependencies, supports WAL mode
 - Node >= 22.5.0 required
-- No tests, no lint, no CI
+- Tests: `npm test` · Lint: `npm run lint` · CI: GitHub Actions (`.github/workflows/ci.yml`)
 - UI strings are in Chinese (表头、分隔符等)

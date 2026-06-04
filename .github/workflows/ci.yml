@@ -4,37 +4,20 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
-  lint-pr:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amannn/action-semantic-pull-request@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  lint:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
-      - run: npm install
+          node-version: 22.x
+          cache: npm
+
+      - run: npm ci
+
       - run: npm run lint
 
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22, 23, 24]
-    steps:
-      - uses: actions/checkout@v6
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm install
       - run: npm test

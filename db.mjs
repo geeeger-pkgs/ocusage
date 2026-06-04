@@ -24,40 +24,42 @@ export function openDB(dbPath) {
   return db;
 }
 
-export function getDailyStats(db, dateStr) {
-  const date = dateStr || new Date().toISOString().slice(0, 10);
-  const [y, m, d] = date.split("-").map(Number);
-  const startMs = Date.UTC(y, m - 1, d, 0, 0, 0);
-  const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999);
+export function validateDate(dateStr) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    throw new Error(`日期格式无效: "${dateStr}"，请使用 YYYY-MM-DD 格式`);
+  }
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const testDate = new Date(Date.UTC(y, m - 1, d));
+  if (testDate.getUTCFullYear() !== y || testDate.getUTCMonth() !== m - 1 || testDate.getUTCDate() !== d) {
+    throw new Error(`日期不存在: "${dateStr}"`);
+  }
+  return dateStr;
+}
 
-  const messages = db
-    .prepare(
-      `SELECT m.id, m.data, s.directory
-       FROM message m
-       LEFT JOIN session s ON m.session_id = s.id
-       WHERE m.time_created >= ? AND m.time_created <= ?`
-    )
-    .all(startMs, endMs);
-
-  const parts = db
-    .prepare(
-      `SELECT p.message_id, p.data
-       FROM part p
-       WHERE p.time_created >= ? AND p.time_created <= ?`
-    )
-    .all(startMs, endMs);
-
+function _aggregateRows(rows) {
   const toolCallCount = new Map();
-  for (const part of parts) {
-    try {
-      const d = JSON.parse(part.data);
-      if (d.type === "tool") {
-        toolCallCount.set(
-          part.message_id,
-          (toolCallCount.get(part.message_id) || 0) + 1
-        );
-      }
-    } catch { /* skip malformed part data */ }
+  const seenMessages = new Set();
+  const messages = [];
+
+  for (const row of rows) {
+    // Count tool calls from parts
+    if (row.part_data != null) {
+      try {
+        const d = JSON.parse(row.part_data);
+        if (d.type === "tool") {
+          toolCallCount.set(
+            row.id,
+            (toolCallCount.get(row.id) || 0) + 1
+          );
+        }
+      } catch { /* skip malformed part data */ }
+    }
+
+    // Deduplicate messages (one message may have multiple parts)
+    if (!seenMessages.has(row.id)) {
+      seenMessages.add(row.id);
+      messages.push({ id: row.id, data: row.data, directory: row.directory });
+    }
   }
 
   const emptyStat = () => ({
@@ -116,5 +118,47 @@ export function getDailyStats(db, dateStr) {
     }
   }
 
+  return { total, byModel, byProject, byProvider };
+}
+
+function _queryRange(db, startMs, endMs) {
+  return db
+    .prepare(
+      `SELECT m.id, m.data, s.directory, p.data AS part_data
+       FROM message m
+       LEFT JOIN session s ON m.session_id = s.id
+       LEFT JOIN part p ON p.message_id = m.id AND p.time_created >= ? AND p.time_created <= ?
+       WHERE m.time_created >= ? AND m.time_created <= ?`
+    )
+    .all(startMs, endMs, startMs, endMs);
+}
+
+export function getDailyStats(db, dateStr) {
+  const date = dateStr || new Date().toISOString().slice(0, 10);
+  validateDate(date);
+  const [y, m, d] = date.split("-").map(Number);
+  const startMs = Date.UTC(y, m - 1, d, 0, 0, 0);
+  const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999);
+
+  const rows = _queryRange(db, startMs, endMs);
+  const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
   return { total, byModel, byProject, byProvider, date };
+}
+
+export function getDateRangeStats(db, fromDate, toDate) {
+  validateDate(fromDate);
+  validateDate(toDate);
+
+  const [fy, fm, fd] = fromDate.split("-").map(Number);
+  const [ty, tm, td] = toDate.split("-").map(Number);
+  const startMs = Date.UTC(fy, fm - 1, fd, 0, 0, 0);
+  const endMs = Date.UTC(ty, tm - 1, td, 23, 59, 59, 999);
+
+  if (startMs > endMs) {
+    throw new Error(`起始日期不能晚于结束日期: ${fromDate} > ${toDate}`);
+  }
+
+  const rows = _queryRange(db, startMs, endMs);
+  const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
+  return { total, byModel, byProject, byProvider, date: `${fromDate} ~ ${toDate}` };
 }

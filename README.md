@@ -31,11 +31,25 @@ ocusage
 # 查看指定日期 / Specific date
 ocusage --date 2025-04-20
 
+# 日期范围查询 / Date range query
+ocusage --from 2025-04-01 --to 2025-04-30
+
+# 只指定起始日期（默认到今天）/ From date to today
+ocusage --from 2025-04-01
+
 # 指定数据库路径 / Custom DB path
 ocusage --db /path/to/opencode.db
 
-# JSON 格式输出 / JSON output
-ocusage --json
+# 输出格式 / Output format
+ocusage --json                    # JSON 输出
+ocusage --format csv              # CSV 格式
+ocusage --format markdown         # Markdown 表格
+
+# 切换语言 / Switch language
+ocusage --lang en                 # English
+ocusage --lang zh-TW              # 繁體中文
+ocusage --lang ja                 # 日本語
+ocusage --lang ko                 # 한국어
 ```
 
 首次运行前确保 [OpenCode](https://opencode.ai) 已使用过至少一次。数据库默认位于：
@@ -44,6 +58,18 @@ Make sure OpenCode has been used at least once. Database default location:
 
 - **Linux/macOS**: `~/.local/share/opencode/opencode.db`
 - **Windows**: `%XDG_DATA_HOME%\opencode\opencode.db` 或 `~/.local/share/opencode/opencode.db`
+
+## 支持语言 / Supported Languages
+
+| 代码 | 语言 |
+|------|------|
+| zh-CN | 简体中文 (默认) |
+| zh-TW | 繁體中文 |
+| en | English |
+| ja | 日本語 |
+| ko | 한국어 |
+
+可通过 `OCUSAGE_LANG` 环境变量设置默认语言。Set the default language via the `OCUSAGE_LANG` environment variable.
 
 ## 输出示例 / Example Output
 
@@ -61,7 +87,9 @@ Make sure OpenCode has been used at least once. Database default location:
 ```
 cli.mjs      — 入口，参数解析 / Entry point, argument parsing
 db.mjs       — 数据库读取与统计 / DB access and aggregation
-report.mjs   — 表格 / JSON 格式化输出 / Table and JSON formatting
+report.mjs   — 多格式输出 / Multi-format output (table/JSON/CSV/Markdown)
+i18n.mjs     — 国际化 / Internationalization
+locales/     — 翻译文件 / Translation files (zh-CN, zh-TW, en, ja, ko)
 ```
 
 ## 要求 / Requirements

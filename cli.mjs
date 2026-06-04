@@ -2,7 +2,7 @@
 
 import { createRequire } from "node:module";
 import { Command } from "commander";
-import { openDB, getDailyStats, getDateRangeStats, validateDate } from "./db.mjs";
+import { getDailyStats, getDateRangeStats, openDB, validateDate } from "./db.mjs";
 import { printReport } from "./report.mjs";
 
 const require = createRequire(import.meta.url);

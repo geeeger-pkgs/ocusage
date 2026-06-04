@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { formatNumber, printReport } from "../report.mjs";
 
 describe("formatNumber", () => {
@@ -34,20 +34,38 @@ describe("formatNumber", () => {
 
 describe("printReport (json mode)", () => {
   it("outputs valid JSON with correct structure", () => {
-    const emptyStat = () => ({
-      requests: 0, inputTokens: 0, outputTokens: 0, toolCalls: 0,
-      cacheRead: 0, cacheWrite: 0, totalTokens: 0,
+    const _emptyStat = () => ({
+      requests: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      toolCalls: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+      totalTokens: 0,
     });
 
     const byModel = new Map();
     byModel.set("test-model (test-provider)", {
-      requests: 1, inputTokens: 100, outputTokens: 50, toolCalls: 0,
-      cacheRead: 0, cacheWrite: 0, totalTokens: 150,
+      requests: 1,
+      inputTokens: 100,
+      outputTokens: 50,
+      toolCalls: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+      totalTokens: 150,
     });
 
     const stats = {
       date: "2025-04-20",
-      total: { requests: 1, inputTokens: 100, outputTokens: 50, toolCalls: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 150 },
+      total: {
+        requests: 1,
+        inputTokens: 100,
+        outputTokens: 50,
+        toolCalls: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+        totalTokens: 150,
+      },
       byModel,
       byProject: new Map(),
       byProvider: new Map(),
@@ -75,10 +93,57 @@ describe("printReport (csv mode)", () => {
   it("outputs CSV with correct headers and data", () => {
     const stats = {
       date: "2025-04-20",
-      total: { requests: 2, inputTokens: 500, outputTokens: 200, toolCalls: 1, cacheRead: 50, cacheWrite: 10, totalTokens: 760 },
-      byModel: new Map([["gpt-4o (openai)", { requests: 2, inputTokens: 500, outputTokens: 200, toolCalls: 1, cacheRead: 50, cacheWrite: 10, totalTokens: 760 }]]),
-      byProject: new Map([["my-project", { requests: 2, inputTokens: 500, outputTokens: 200, toolCalls: 1, cacheRead: 50, cacheWrite: 10, totalTokens: 760 }]]),
-      byProvider: new Map([["openai", { requests: 2, inputTokens: 500, outputTokens: 200, toolCalls: 1, cacheRead: 50, cacheWrite: 10, totalTokens: 760 }]]),
+      total: {
+        requests: 2,
+        inputTokens: 500,
+        outputTokens: 200,
+        toolCalls: 1,
+        cacheRead: 50,
+        cacheWrite: 10,
+        totalTokens: 760,
+      },
+      byModel: new Map([
+        [
+          "gpt-4o (openai)",
+          {
+            requests: 2,
+            inputTokens: 500,
+            outputTokens: 200,
+            toolCalls: 1,
+            cacheRead: 50,
+            cacheWrite: 10,
+            totalTokens: 760,
+          },
+        ],
+      ]),
+      byProject: new Map([
+        [
+          "my-project",
+          {
+            requests: 2,
+            inputTokens: 500,
+            outputTokens: 200,
+            toolCalls: 1,
+            cacheRead: 50,
+            cacheWrite: 10,
+            totalTokens: 760,
+          },
+        ],
+      ]),
+      byProvider: new Map([
+        [
+          "openai",
+          {
+            requests: 2,
+            inputTokens: 500,
+            outputTokens: 200,
+            toolCalls: 1,
+            cacheRead: 50,
+            cacheWrite: 10,
+            totalTokens: 760,
+          },
+        ],
+      ]),
     };
 
     const logs = [];
@@ -92,9 +157,9 @@ describe("printReport (csv mode)", () => {
 
     assert.ok(logs[0].startsWith("分组,"));
     assert.ok(logs[1].startsWith("总计,"));
-    assert.ok(logs.some(l => l.includes("模型")));
-    assert.ok(logs.some(l => l.includes("项目")));
-    assert.ok(logs.some(l => l.includes("供应商")));
+    assert.ok(logs.some((l) => l.includes("模型")));
+    assert.ok(logs.some((l) => l.includes("项目")));
+    assert.ok(logs.some((l) => l.includes("供应商")));
   });
 });
 
@@ -102,10 +167,44 @@ describe("printReport (markdown mode)", () => {
   it("outputs valid markdown tables", () => {
     const stats = {
       date: "2025-04-20",
-      total: { requests: 1, inputTokens: 100, outputTokens: 50, toolCalls: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 150 },
-      byModel: new Map([["test-model (test)", { requests: 1, inputTokens: 100, outputTokens: 50, toolCalls: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 150 }]]),
+      total: {
+        requests: 1,
+        inputTokens: 100,
+        outputTokens: 50,
+        toolCalls: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+        totalTokens: 150,
+      },
+      byModel: new Map([
+        [
+          "test-model (test)",
+          {
+            requests: 1,
+            inputTokens: 100,
+            outputTokens: 50,
+            toolCalls: 0,
+            cacheRead: 0,
+            cacheWrite: 0,
+            totalTokens: 150,
+          },
+        ],
+      ]),
       byProject: new Map(),
-      byProvider: new Map([["test", { requests: 1, inputTokens: 100, outputTokens: 50, toolCalls: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 150 }]]),
+      byProvider: new Map([
+        [
+          "test",
+          {
+            requests: 1,
+            inputTokens: 100,
+            outputTokens: 50,
+            toolCalls: 0,
+            cacheRead: 0,
+            cacheWrite: 0,
+            totalTokens: 150,
+          },
+        ],
+      ]),
     };
 
     const logs = [];
@@ -129,7 +228,15 @@ describe("printReport (empty data friendly message)", () => {
   it("shows friendly message in table mode when no data", () => {
     const stats = {
       date: "2025-04-20",
-      total: { requests: 0, inputTokens: 0, outputTokens: 0, toolCalls: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0 },
+      total: {
+        requests: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        toolCalls: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+        totalTokens: 0,
+      },
       byModel: new Map(),
       byProject: new Map(),
       byProvider: new Map(),

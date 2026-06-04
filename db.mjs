@@ -1,22 +1,19 @@
-import { DatabaseSync } from "node:sqlite";
-import { join } from "node:path";
-import { homedir } from "node:os";
 import { existsSync } from "node:fs";
-import { basename } from "node:path";
+import { homedir } from "node:os";
+import { basename, join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
 const DEFAULT_DB_PATH = join(
   process.env.XDG_DATA_HOME || join(homedir(), ".local", "share"),
   "opencode",
-  "opencode.db"
+  "opencode.db",
 );
 
 export function openDB(dbPath) {
   const path = dbPath || DEFAULT_DB_PATH;
   if (!existsSync(path)) {
     console.error(`Database not found: ${path}`);
-    console.error(
-      `Make sure OpenCode is installed and has been used at least once.`
-    );
+    console.error(`Make sure OpenCode is installed and has been used at least once.`);
     process.exit(1);
   }
   const db = new DatabaseSync(path);
@@ -47,12 +44,11 @@ function _aggregateRows(rows) {
       try {
         const d = JSON.parse(row.part_data);
         if (d.type === "tool") {
-          toolCallCount.set(
-            row.id,
-            (toolCallCount.get(row.id) || 0) + 1
-          );
+          toolCallCount.set(row.id, (toolCallCount.get(row.id) || 0) + 1);
         }
-      } catch { /* skip malformed part data */ }
+      } catch {
+        /* skip malformed part data */
+      }
     }
 
     // Deduplicate messages (one message may have multiple parts)
@@ -63,8 +59,13 @@ function _aggregateRows(rows) {
   }
 
   const emptyStat = () => ({
-    requests: 0, inputTokens: 0, outputTokens: 0, toolCalls: 0,
-    cacheRead: 0, cacheWrite: 0, totalTokens: 0,
+    requests: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    toolCalls: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    totalTokens: 0,
   });
 
   const total = emptyStat();
@@ -76,7 +77,9 @@ function _aggregateRows(rows) {
     let data;
     try {
       data = JSON.parse(msg.data);
-    } catch { continue; }
+    } catch {
+      continue;
+    }
 
     if (data.role !== "assistant") continue;
 
@@ -128,7 +131,7 @@ function _queryRange(db, startMs, endMs) {
        FROM message m
        LEFT JOIN session s ON m.session_id = s.id
        LEFT JOIN part p ON p.message_id = m.id AND p.time_created >= ? AND p.time_created <= ?
-       WHERE m.time_created >= ? AND m.time_created <= ?`
+       WHERE m.time_created >= ? AND m.time_created <= ?`,
     )
     .all(startMs, endMs, startMs, endMs);
 }

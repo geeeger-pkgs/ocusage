@@ -1,7 +1,7 @@
-import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import { beforeEach, describe, it } from "node:test";
 import { getDailyStats, getDateRangeStats, validateDate } from "../db.mjs";
-import { createTestDB, seedTypicalDay, insertSession, insertMessage, DAY } from "./fixtures/helpers.mjs";
+import { createTestDB, DAY, insertSession, seedTypicalDay } from "./fixtures/helpers.mjs";
 
 describe("getDailyStats", () => {
   let db;
@@ -89,8 +89,12 @@ describe("getDailyStats", () => {
 
   it("handles malformed message data gracefully", () => {
     insertSession(db, "s1", "/project");
-    db.prepare("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)")
-      .run("m-bad", "s1", "not-json", DAY["2025-04-20"].start + 1000);
+    db.prepare("INSERT INTO message (id, session_id, data, time_created) VALUES (?, ?, ?, ?)").run(
+      "m-bad",
+      "s1",
+      "not-json",
+      DAY["2025-04-20"].start + 1000,
+    );
 
     const result = getDailyStats(db, "2025-04-20");
     assert.equal(result.total.requests, 0);

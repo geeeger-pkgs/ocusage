@@ -17,10 +17,21 @@ function makeTable(headers) {
       compact: true,
     },
     chars: {
-      top: "─", "top-mid": "┬", "top-left": "┌", "top-right": "┐",
-      bottom: "─", "bottom-mid": "┴", "bottom-left": "└", "bottom-right": "┘",
-      left: "│", "left-mid": "├", mid: "─", "mid-mid": "┼",
-      right: "│", "right-mid": "┤", middle: "│",
+      top: "─",
+      "top-mid": "┬",
+      "top-left": "┌",
+      "top-right": "┐",
+      bottom: "─",
+      "bottom-mid": "┴",
+      "bottom-left": "└",
+      "bottom-right": "┘",
+      left: "│",
+      "left-mid": "├",
+      mid: "─",
+      "mid-mid": "┼",
+      right: "│",
+      "right-mid": "┤",
+      middle: "│",
     },
     wordWrap: true,
   });
@@ -51,38 +62,97 @@ function isAllZero(s) {
   );
 }
 
-const COL_HEADERS = [
-  "今日总请求数", "输入Tokens", "输出Tokens", "工具调用数量",
-  "缓存读取", "缓存创建", "总计Tokens",
-];
+const COL_HEADERS = ["今日总请求数", "输入Tokens", "输出Tokens", "工具调用数量", "缓存读取", "缓存创建", "总计Tokens"];
 const GROUP_HEADERS = (first) => [
-  first, "请求数", "输入Tokens", "输出Tokens", "工具调用数量",
-  "缓存读取", "缓存创建", "总计Tokens",
+  first,
+  "请求数",
+  "输入Tokens",
+  "输出Tokens",
+  "工具调用数量",
+  "缓存读取",
+  "缓存创建",
+  "总计Tokens",
 ];
 
 function csvEscape(val) {
   const s = String(val);
-  return s.includes(",") || s.includes('"') || s.includes("\n")
-    ? '"' + s.replace(/"/g, '""') + '"'
-    : s;
+  return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 function printCSV(stats) {
-  const headers = ["分组", "名称", "请求数", "输入Tokens", "输出Tokens", "工具调用数量", "缓存读取", "缓存创建", "总计Tokens"];
+  const headers = [
+    "分组",
+    "名称",
+    "请求数",
+    "输入Tokens",
+    "输出Tokens",
+    "工具调用数量",
+    "缓存读取",
+    "缓存创建",
+    "总计Tokens",
+  ];
   console.log(headers.join(","));
-  console.log(["总计", "-", stats.total.requests, stats.total.inputTokens, stats.total.outputTokens, stats.total.toolCalls, stats.total.cacheRead, stats.total.cacheWrite, stats.total.totalTokens].join(","));
+  console.log(
+    [
+      "总计",
+      "-",
+      stats.total.requests,
+      stats.total.inputTokens,
+      stats.total.outputTokens,
+      stats.total.toolCalls,
+      stats.total.cacheRead,
+      stats.total.cacheWrite,
+      stats.total.totalTokens,
+    ].join(","),
+  );
 
   for (const [name, s] of stats.byModel) {
     if (isAllZero(s)) continue;
-    console.log(["模型", csvEscape(name), s.requests, s.inputTokens, s.outputTokens, s.toolCalls, s.cacheRead, s.cacheWrite, s.totalTokens].join(","));
+    console.log(
+      [
+        "模型",
+        csvEscape(name),
+        s.requests,
+        s.inputTokens,
+        s.outputTokens,
+        s.toolCalls,
+        s.cacheRead,
+        s.cacheWrite,
+        s.totalTokens,
+      ].join(","),
+    );
   }
   for (const [name, s] of stats.byProject) {
     if (isAllZero(s)) continue;
-    console.log(["项目", csvEscape(name), s.requests, s.inputTokens, s.outputTokens, s.toolCalls, s.cacheRead, s.cacheWrite, s.totalTokens].join(","));
+    console.log(
+      [
+        "项目",
+        csvEscape(name),
+        s.requests,
+        s.inputTokens,
+        s.outputTokens,
+        s.toolCalls,
+        s.cacheRead,
+        s.cacheWrite,
+        s.totalTokens,
+      ].join(","),
+    );
   }
   for (const [name, s] of stats.byProvider) {
     if (isAllZero(s)) continue;
-    console.log(["供应商", csvEscape(name), s.requests, s.inputTokens, s.outputTokens, s.toolCalls, s.cacheRead, s.cacheWrite, s.totalTokens].join(","));
+    console.log(
+      [
+        "供应商",
+        csvEscape(name),
+        s.requests,
+        s.inputTokens,
+        s.outputTokens,
+        s.toolCalls,
+        s.cacheRead,
+        s.cacheWrite,
+        s.totalTokens,
+      ].join(","),
+    );
   }
 }
 
@@ -92,7 +162,9 @@ function printMarkdown(stats) {
   console.log("| 请求数 | 输入Tokens | 输出Tokens | 工具调用 | 缓存读取 | 缓存创建 | 总计Tokens |");
   console.log("|--------|-----------|-----------|---------|---------|---------|-----------|");
   const t = stats.total;
-  console.log(`| ${t.requests} | ${t.inputTokens} | ${t.outputTokens} | ${t.toolCalls} | ${t.cacheRead} | ${t.cacheWrite} | ${t.totalTokens} |`);
+  console.log(
+    `| ${t.requests} | ${t.inputTokens} | ${t.outputTokens} | ${t.toolCalls} | ${t.cacheRead} | ${t.cacheWrite} | ${t.totalTokens} |`,
+  );
 
   // 按模型
   console.log("\n### 按模型\n");
@@ -100,7 +172,9 @@ function printMarkdown(stats) {
   console.log("|------|--------|-----------|-----------|---------|---------|---------|-----------|");
   for (const [name, s] of stats.byModel) {
     if (isAllZero(s)) continue;
-    console.log(`| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`);
+    console.log(
+      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
+    );
   }
 
   // 按项目
@@ -109,7 +183,9 @@ function printMarkdown(stats) {
   console.log("|------|--------|-----------|-----------|---------|---------|---------|-----------|");
   for (const [name, s] of stats.byProject) {
     if (isAllZero(s)) continue;
-    console.log(`| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`);
+    console.log(
+      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
+    );
   }
 
   // 按供应商
@@ -118,7 +194,9 @@ function printMarkdown(stats) {
   console.log("|--------|--------|-----------|-----------|---------|---------|---------|-----------|");
   for (const [name, s] of stats.byProvider) {
     if (isAllZero(s)) continue;
-    console.log(`| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`);
+    console.log(
+      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
+    );
   }
 }
 
@@ -134,13 +212,19 @@ export function printReport(stats, opts = {}) {
       }
       return obj;
     };
-    console.log(JSON.stringify({
-      date: stats.date,
-      total: stats.total,
-      byModel: serializeMap(stats.byModel),
-      byProject: serializeMap(stats.byProject),
-      byProvider: serializeMap(stats.byProvider),
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          date: stats.date,
+          total: stats.total,
+          byModel: serializeMap(stats.byModel),
+          byProject: serializeMap(stats.byProject),
+          byProvider: serializeMap(stats.byProvider),
+        },
+        null,
+        2,
+      ),
+    );
     return;
   }
 

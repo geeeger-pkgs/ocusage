@@ -34,7 +34,7 @@
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "lint": "eslint *.mjs",
+    "lint": "biome check .",
     "prepare": "husky"
   },
   "files": [
@@ -44,10 +44,9 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.2.1",
     "husky": "^9.1.7"
   }
 }

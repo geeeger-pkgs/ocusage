@@ -1,1 +1,1 @@
-npx --no -- eslint *.mjs --fix
+npx --no -- biome check --write *.mjs

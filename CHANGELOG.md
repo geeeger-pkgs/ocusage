@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0](https://github.com/geeeger-pkgs/ocusage/compare/v2.2.0...v2.3.0) (2026-06-04)
+
+
+### Features
+
+* 新增 compare 子命令支持时段对比分析 ([3b38679](https://github.com/geeeger-pkgs/ocusage/commit/3b3867912fc51ac34ae0d4e840241b527a722d24))
+
 ## [2.2.0](https://github.com/geeeger-pkgs/ocusage/compare/v2.1.0...v2.2.0) (2026-06-04)
 
 

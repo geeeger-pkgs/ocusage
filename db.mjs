@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { t } from "./i18n.mjs";
 
 const DEFAULT_DB_PATH = join(
   process.env.XDG_DATA_HOME || join(homedir(), ".local", "share"),
@@ -23,12 +24,12 @@ export function openDB(dbPath) {
 
 export function validateDate(dateStr) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    throw new Error(`日期格式无效: "${dateStr}"，请使用 YYYY-MM-DD 格式`);
+    throw new Error(t("invalidDateFormat", { value: dateStr }));
   }
   const [y, m, d] = dateStr.split("-").map(Number);
   const testDate = new Date(Date.UTC(y, m - 1, d));
   if (testDate.getUTCFullYear() !== y || testDate.getUTCMonth() !== m - 1 || testDate.getUTCDate() !== d) {
-    throw new Error(`日期不存在: "${dateStr}"`);
+    throw new Error(t("dateNotExist", { value: dateStr }));
   }
   return dateStr;
 }
@@ -158,7 +159,7 @@ export function getDateRangeStats(db, fromDate, toDate) {
   const endMs = Date.UTC(ty, tm - 1, td, 23, 59, 59, 999);
 
   if (startMs > endMs) {
-    throw new Error(`起始日期不能晚于结束日期: ${fromDate} > ${toDate}`);
+    throw new Error(t("startAfterEnd", { from: fromDate, to: toDate }));
   }
 
   const rows = _queryRange(db, startMs, endMs);

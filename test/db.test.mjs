@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { getDailyStats, getDateRangeStats, validateDate } from "../db.mjs";
+import { setLocale } from "../i18n.mjs";
 import { createTestDB, DAY, insertSession, seedTypicalDay } from "./fixtures/helpers.mjs";
+
+setLocale("zh-CN");
 
 describe("getDailyStats", () => {
   let db;

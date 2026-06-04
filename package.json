@@ -41,6 +41,8 @@
     "cli.mjs",
     "db.mjs",
     "report.mjs",
+    "i18n.mjs",
+    "locales",
     "LICENSE"
   ],
   "devDependencies": {

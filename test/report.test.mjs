@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { setLocale } from "../i18n.mjs";
 import { formatNumber, printReport } from "../report.mjs";
+
+setLocale("zh-CN");
 
 describe("formatNumber", () => {
   it("returns 0 for 0", () => {

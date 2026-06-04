@@ -3,6 +3,7 @@
 import { createRequire } from "node:module";
 import { Command } from "commander";
 import { getDailyStats, getDateRangeStats, openDB, validateDate } from "./db.mjs";
+import { detectLocale, setLocale, t } from "./i18n.mjs";
 import { printReport } from "./report.mjs";
 
 const require = createRequire(import.meta.url);
@@ -20,7 +21,10 @@ program
   .option("--db <path>", "path to opencode.db")
   .option("-f, --format <type>", "output format: table, json, csv, markdown", "table")
   .option("-j, --json", "output as JSON (alias for --format json)")
+  // --lang: choices are SUPPORTED_LOCALES (zh-CN, zh-TW, en, ja, ko)
+  .option("-l, --lang <locale>", "output language")
   .action((opts) => {
+    setLocale(detectLocale(opts.lang));
     try {
       const db = openDB(opts.db);
       let stats;
@@ -36,7 +40,7 @@ program
       const format = opts.json ? "json" : opts.format;
       printReport(stats, { format });
     } catch (err) {
-      console.error(`错误: ${err.message}`);
+      console.error(`${t("errorPrefix")}: ${err.message}`);
       process.exit(1);
     }
   });

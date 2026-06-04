@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import Table from "cli-table3";
+import { t } from "./i18n.mjs";
 
 export function formatNumber(n) {
   if (n === null || n === undefined || n === 0) return "0";
@@ -62,16 +63,24 @@ function isAllZero(s) {
   );
 }
 
-const COL_HEADERS = ["今日总请求数", "输入Tokens", "输出Tokens", "工具调用数量", "缓存读取", "缓存创建", "总计Tokens"];
+const COL_HEADERS = () => [
+  t("totalRequests"),
+  t("inputTokens"),
+  t("outputTokens"),
+  t("toolCalls"),
+  t("cacheRead"),
+  t("cacheWrite"),
+  t("totalTokens"),
+];
 const GROUP_HEADERS = (first) => [
   first,
-  "请求数",
-  "输入Tokens",
-  "输出Tokens",
-  "工具调用数量",
-  "缓存读取",
-  "缓存创建",
-  "总计Tokens",
+  t("requests"),
+  t("inputTokens"),
+  t("outputTokens"),
+  t("toolCalls"),
+  t("cacheRead"),
+  t("cacheWrite"),
+  t("totalTokens"),
 ];
 
 function csvEscape(val) {
@@ -81,20 +90,20 @@ function csvEscape(val) {
 
 function printCSV(stats) {
   const headers = [
-    "分组",
-    "名称",
-    "请求数",
-    "输入Tokens",
-    "输出Tokens",
-    "工具调用数量",
-    "缓存读取",
-    "缓存创建",
-    "总计Tokens",
+    t("csvGroup"),
+    t("csvName"),
+    t("requests"),
+    t("inputTokens"),
+    t("outputTokens"),
+    t("toolCalls"),
+    t("cacheRead"),
+    t("cacheWrite"),
+    t("totalTokens"),
   ];
   console.log(headers.join(","));
   console.log(
     [
-      "总计",
+      t("groupTotal"),
       "-",
       stats.total.requests,
       stats.total.inputTokens,
@@ -110,7 +119,7 @@ function printCSV(stats) {
     if (isAllZero(s)) continue;
     console.log(
       [
-        "模型",
+        t("groupModel"),
         csvEscape(name),
         s.requests,
         s.inputTokens,
@@ -126,7 +135,7 @@ function printCSV(stats) {
     if (isAllZero(s)) continue;
     console.log(
       [
-        "项目",
+        t("groupProject"),
         csvEscape(name),
         s.requests,
         s.inputTokens,
@@ -142,7 +151,7 @@ function printCSV(stats) {
     if (isAllZero(s)) continue;
     console.log(
       [
-        "供应商",
+        t("groupProvider"),
         csvEscape(name),
         s.requests,
         s.inputTokens,
@@ -157,18 +166,24 @@ function printCSV(stats) {
 }
 
 function printMarkdown(stats) {
-  console.log(`## 📊 使用报告 (${stats.date})\n`);
-  console.log("### 总计\n");
-  console.log("| 请求数 | 输入Tokens | 输出Tokens | 工具调用 | 缓存读取 | 缓存创建 | 总计Tokens |");
-  console.log("|--------|-----------|-----------|---------|---------|---------|-----------|");
-  const t = stats.total;
+  console.log(t("usageReport", { date: stats.date }));
+  console.log();
+  console.log(t("mdTotal"));
+  console.log();
   console.log(
-    `| ${t.requests} | ${t.inputTokens} | ${t.outputTokens} | ${t.toolCalls} | ${t.cacheRead} | ${t.cacheWrite} | ${t.totalTokens} |`,
+    `| ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
+  );
+  console.log("|--------|-----------|-----------|---------|---------|---------|-----------|");
+  const tot = stats.total;
+  console.log(
+    `| ${tot.requests} | ${tot.inputTokens} | ${tot.outputTokens} | ${tot.toolCalls} | ${tot.cacheRead} | ${tot.cacheWrite} | ${tot.totalTokens} |`,
   );
 
   // 按模型
-  console.log("\n### 按模型\n");
-  console.log("| 模型 | 请求数 | 输入Tokens | 输出Tokens | 工具调用 | 缓存读取 | 缓存创建 | 总计Tokens |");
+  console.log(`\n${t("mdByModel")}\n`);
+  console.log(
+    `| ${t("model")} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
+  );
   console.log("|------|--------|-----------|-----------|---------|---------|---------|-----------|");
   for (const [name, s] of stats.byModel) {
     if (isAllZero(s)) continue;
@@ -178,8 +193,10 @@ function printMarkdown(stats) {
   }
 
   // 按项目
-  console.log("\n### 按项目\n");
-  console.log("| 项目 | 请求数 | 输入Tokens | 输出Tokens | 工具调用 | 缓存读取 | 缓存创建 | 总计Tokens |");
+  console.log(`\n${t("mdByProject")}\n`);
+  console.log(
+    `| ${t("project")} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
+  );
   console.log("|------|--------|-----------|-----------|---------|---------|---------|-----------|");
   for (const [name, s] of stats.byProject) {
     if (isAllZero(s)) continue;
@@ -189,8 +206,10 @@ function printMarkdown(stats) {
   }
 
   // 按供应商
-  console.log("\n### 按供应商\n");
-  console.log("| 供应商 | 请求数 | 输入Tokens | 输出Tokens | 工具调用 | 缓存读取 | 缓存创建 | 总计Tokens |");
+  console.log(`\n${t("mdByProvider")}\n`);
+  console.log(
+    `| ${t("provider")} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
+  );
   console.log("|--------|--------|-----------|-----------|---------|---------|---------|-----------|");
   for (const [name, s] of stats.byProvider) {
     if (isAllZero(s)) continue;
@@ -240,12 +259,12 @@ export function printReport(stats, opts = {}) {
 
   // table format (default)
   if (stats.total.requests === 0) {
-    console.log(chalk.gray(`📭 ${stats.date} 暂无使用记录`));
+    console.log(chalk.gray(t("noData", { date: stats.date })));
     return;
   }
 
-  console.log(chalk.bold(`📊 总体数据 (${stats.date})`));
-  const t1 = makeTable(COL_HEADERS);
+  console.log(chalk.bold(t("overallData", { date: stats.date })));
+  const t1 = makeTable(COL_HEADERS());
   t1.push([
     formatNumber(stats.total.requests),
     formatNumber(stats.total.inputTokens),
@@ -257,24 +276,24 @@ export function printReport(stats, opts = {}) {
   ]);
   console.log(t1.toString());
 
-  console.log(chalk.bold("\n📊 按模型分组"));
-  const t2 = makeTable(GROUP_HEADERS("模型"));
+  console.log(chalk.bold(`\n${t("byModelTitle")}`));
+  const t2 = makeTable(GROUP_HEADERS(t("model")));
   for (const [model, s] of stats.byModel) {
     if (isAllZero(s)) continue;
     t2.push(statRow(model, s, chalk.cyan));
   }
   console.log(t2.toString());
 
-  console.log(chalk.bold("\n📊 按项目分组"));
-  const t3 = makeTable(GROUP_HEADERS("项目"));
+  console.log(chalk.bold(`\n${t("byProjectTitle")}`));
+  const t3 = makeTable(GROUP_HEADERS(t("project")));
   for (const [project, s] of stats.byProject) {
     if (isAllZero(s)) continue;
     t3.push(statRow(project, s, chalk.cyan));
   }
   console.log(t3.toString());
 
-  console.log(chalk.bold("\n📊 按供应商分组"));
-  const t4 = makeTable(GROUP_HEADERS("供应商"));
+  console.log(chalk.bold(`\n${t("byProviderTitle")}`));
+  const t4 = makeTable(GROUP_HEADERS(t("provider")));
   for (const [provider, s] of stats.byProvider) {
     if (isAllZero(s)) continue;
     t4.push(statRow(provider, s, chalk.cyan));

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/geeeger-pkgs/ocusage/compare/v2.1.0...v2.2.0) (2026-06-04)
+
+
+### Features
+
+* 新增 i18n 国际化支持 ([3887a6a](https://github.com/geeeger-pkgs/ocusage/commit/3887a6a39187a32dcbd2a6bde46f75d046aa9e48))
+
 ## [2.1.0](https://github.com/geeeger-pkgs/ocusage/compare/v2.0.0...v2.1.0) (2026-06-04)
 
 

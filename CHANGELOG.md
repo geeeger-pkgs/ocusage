@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1](https://github.com/geeeger-pkgs/ocusage/compare/v3.0.0...v3.0.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* 修复compare命令-c参数被父命令抢占导致始终查询opencode的问题 ([fc98d6a](https://github.com/geeeger-pkgs/ocusage/commit/fc98d6a1af52f57f44ad619d532663db1a524c8d))
+
 ## [3.0.0](https://github.com/geeeger-pkgs/ocusage/compare/v2.3.0...v3.0.0) (2026-06-05)
 
 

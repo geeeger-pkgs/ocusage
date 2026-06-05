@@ -7,7 +7,7 @@ import { Command } from "commander";
 import { getConfigPath, getCustomPaths, getSavedLocale, loadConfig, saveConfig } from "./config.mjs";
 import { detectLocale, SUPPORTED_LOCALES, setLocale, t } from "./i18n.mjs";
 import { aggregateStats, detectClients, getAllStats } from "./multi.mjs";
-import { parsePeriod, validateDate } from "./providers/base.mjs";
+import { parsePeriod, resolveDateAlias, validateDate } from "./providers/base.mjs";
 import { AVAILABLE_PROVIDERS, detectProviders } from "./providers/index.mjs";
 import { printCompareReport, printMultiClientReport, printReport } from "./report.mjs";
 
@@ -21,9 +21,13 @@ program
   .name("ocusage")
   .description("AI client daily token usage report")
   .version(pkg.version)
-  .option("-d, --date <YYYY-MM-DD>", "date to query", (val) => validateDate(val), new Date().toISOString().slice(0, 10))
-  .option("--from <YYYY-MM-DD>", "range start date", (val) => validateDate(val))
-  .option("--to <YYYY-MM-DD>", "range end date", (val) => validateDate(val))
+  .option(
+    "-d, --date <date>",
+    "date to query (YYYY-MM-DD or alias: today/yesterday/week/month/last-week/last-month)",
+    new Date().toISOString().slice(0, 10),
+  )
+  .option("--from <date>", "range start date (YYYY-MM-DD or date alias)")
+  .option("--to <date>", "range end date (YYYY-MM-DD or date alias)")
   .option("--db <path>", "custom database/data path (single client mode only)")
   .option("-c, --client <names>", "client filter: opencode,qoder,qoder-cli,claude,trae,trae-solo or 'all'")
   .option("-f, --format <type>", "output format: table, json, csv, markdown", "table")
@@ -56,8 +60,7 @@ function handleMultiClient(opts, clientFilter, format) {
       }
     }
 
-    const dateStr = opts.from || opts.to ? opts.from || opts.to : opts.date;
-    const toDateStr = opts.from || opts.to ? opts.to || new Date().toISOString().slice(0, 10) : null;
+    const { dateStr, toDateStr } = resolveDateOptions(opts);
 
     const results = getAllStats(dateStr, toDateStr, { clientFilter, customPaths });
 
@@ -102,6 +105,37 @@ function handleMultiClient(opts, clientFilter, format) {
     console.error(`${t("errorPrefix")}: ${err.message}`);
     process.exit(1);
   }
+}
+
+function resolveSingleAlias(input) {
+  // Resolve an alias to a single YYYY-MM-DD value.
+  // Range aliases collapse to their `from` date when used as a single endpoint.
+  if (!input) return null;
+  const alias = resolveDateAlias(input);
+  if (!alias) return null;
+  return alias.type === "single" ? alias.date : alias.from;
+}
+
+function resolveDateOptions(opts) {
+  if (opts.from || opts.to) {
+    const fromResolved = opts.from ? resolveSingleAlias(opts.from) || opts.from : null;
+    const toResolved = opts.to ? resolveSingleAlias(opts.to) || opts.to : null;
+    if (fromResolved) validateDate(fromResolved);
+    if (toResolved) validateDate(toResolved);
+    const dateStr = fromResolved || toResolved;
+    const toDateStr = toResolved || new Date().toISOString().slice(0, 10);
+    return { dateStr, toDateStr };
+  }
+
+  const alias = resolveDateAlias(opts.date);
+  if (alias?.type === "range") {
+    return { dateStr: alias.from, toDateStr: alias.to };
+  }
+  if (alias?.type === "single") {
+    return { dateStr: alias.date, toDateStr: null };
+  }
+  validateDate(opts.date);
+  return { dateStr: opts.date, toDateStr: null };
 }
 
 function serializeStats(stats) {
@@ -173,8 +207,8 @@ function handleMultiClientCompare(opts, clientFilter, format) {
       }
     }
 
-    const rangeA = parsePeriod(opts.a);
-    const rangeB = parsePeriod(opts.b);
+    const rangeA = resolvePeriodInput(opts.a);
+    const rangeB = resolvePeriodInput(opts.b);
 
     const resultsA = getAllStats(rangeA.from, rangeA.to, { clientFilter, customPaths });
     const resultsB = getAllStats(rangeB.from, rangeB.to, { clientFilter, customPaths });
@@ -195,6 +229,17 @@ function handleMultiClientCompare(opts, clientFilter, format) {
     console.error(`${t("errorPrefix")}: ${err.message}`);
     process.exit(1);
   }
+}
+
+function resolvePeriodInput(input) {
+  const alias = resolveDateAlias(input);
+  if (alias?.type === "range") {
+    return { from: alias.from, to: alias.to };
+  }
+  if (alias?.type === "single") {
+    return { from: alias.date, to: alias.date };
+  }
+  return parsePeriod(input);
 }
 
 program

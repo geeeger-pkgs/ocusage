@@ -42,6 +42,13 @@ ocusage
 # 查看指定日期 / Specific date
 ocusage --date 2025-04-20
 
+# 快捷日期别名 / Date aliases
+ocusage -d yesterday          # 昨天 / Yesterday
+ocusage -d week               # 本周一到今天 / This week (Mon–today)
+ocusage -d month              # 本月1号到今天 / This month (1st–today)
+ocusage -d last-week          # 上周 / Last week (Mon–Sun)
+ocusage -d last-month         # 上月 / Last month
+
 # 日期范围查询 / Date range query
 ocusage --from 2025-04-01 --to 2025-04-30
 
@@ -65,6 +72,7 @@ ocusage --lang ko                 # 한국어
 # 数据对比 / Compare periods
 ocusage compare --a 2025-04 --b 2025-05            # 月对比 / Monthly
 ocusage compare --a 2025-04-01 --b 2025-04-02      # 日对比 / Daily
+ocusage compare --a last-month --b month            # 别名对比 / Alias compare
 ocusage compare --a 2025-04 --b 2025-05 --json     # JSON 格式输出
 ocusage compare --a 2025-04 --b 2025-05 --lang en  # English output
 ```

@@ -47,6 +47,71 @@ export function validateDate(dateStr) {
 }
 
 /**
+ * Format a Date object as a local-time YYYY-MM-DD string.
+ */
+function formatLocalDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Resolve a date alias to a single date or a date range.
+ *
+ * Supported aliases (case-insensitive):
+ *   - today       → { type: 'single', date }
+ *   - yesterday   → { type: 'single', date }
+ *   - week        → { type: 'range', from: monday, to: today }
+ *   - month       → { type: 'range', from: first-of-month, to: today }
+ *   - last-week   → { type: 'range', from: last-monday, to: last-sunday }
+ *   - last-month  → { type: 'range', from: first-of-last-month, to: last-of-last-month }
+ *
+ * Returns null when the input is not a recognized alias
+ * (callers should fall back to existing date/period parsing).
+ */
+export function resolveDateAlias(input, now = new Date()) {
+  if (typeof input !== "string") return null;
+  const key = input.trim().toLowerCase();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  switch (key) {
+    case "today":
+      return { type: "single", date: formatLocalDate(today) };
+    case "yesterday": {
+      const d = new Date(today);
+      d.setDate(d.getDate() - 1);
+      return { type: "single", date: formatLocalDate(d) };
+    }
+    case "week": {
+      const mon = new Date(today);
+      const day = mon.getDay();
+      mon.setDate(mon.getDate() - (day === 0 ? 6 : day - 1));
+      return { type: "range", from: formatLocalDate(mon), to: formatLocalDate(today) };
+    }
+    case "month": {
+      const first = new Date(today.getFullYear(), today.getMonth(), 1);
+      return { type: "range", from: formatLocalDate(first), to: formatLocalDate(today) };
+    }
+    case "last-week": {
+      const mon = new Date(today);
+      const day = mon.getDay();
+      mon.setDate(mon.getDate() - (day === 0 ? 6 : day - 1) - 7);
+      const sun = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+      return { type: "range", from: formatLocalDate(mon), to: formatLocalDate(sun) };
+    }
+    case "last-month": {
+      const first = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const last = new Date(today.getFullYear(), today.getMonth(), 0);
+      return { type: "range", from: formatLocalDate(first), to: formatLocalDate(last) };
+    }
+    default:
+      return null;
+  }
+}
+
+/**
  * Parse a period string (YYYY-MM or YYYY-MM-DD) into {from, to}.
  */
 export function parsePeriod(period) {

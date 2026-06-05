@@ -208,7 +208,8 @@ program
     setLocale(detectLocale(opts.lang || savedLocale));
 
     if (opts.reset) {
-      saveConfig({ customPaths: {} });
+      const config = loadConfig();
+      saveConfig({ locale: config.locale, customPaths: {} });
       console.log(t("configResetAll"));
       return;
     }

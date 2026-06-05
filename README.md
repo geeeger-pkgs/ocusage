@@ -2,9 +2,9 @@
 
 [![npm version](https://img.shields.io/npm/v/@geeeger/ocusage.svg)](https://www.npmjs.com/package/@geeeger/ocusage) [![license](https://img.shields.io/npm/l/@geeeger/ocusage.svg)](https://github.com/geeeger-pkgs/ocusage/blob/main/LICENSE) [![node](https://img.shields.io/node/v/@geeeger/ocusage.svg)](https://nodejs.org)
 
-OpenCode 每日 Token 用量报告 CLI。直接读取 OpenCode 本地 SQLite 数据库，按模型、项目、供应商分组展示每日 token 消耗。
+AI 客户端每日 Token 用量报告 CLI。统一读取多个 AI 客户端的本地数据（SQLite/JSONL），按模型、项目、供应商分组展示每日 token 消耗，支持跨客户端聚合与对比分析。
 
-Daily token usage report for [OpenCode](https://opencode.ai). Reads the local SQLite database and shows per-day token consumption grouped by model, project, and provider.
+Daily token usage report CLI for AI clients. Reads local data (SQLite/JSONL) from multiple AI clients and shows per-day token consumption grouped by model, project, and provider, with cross-client aggregation and comparison.
 
 ## 安装 / Install
 
@@ -18,9 +18,20 @@ npm install -g @geeeger/ocusage
 node cli.mjs
 ```
 
-> 使用 Node.js 内置 `node:sqlite` 模块，零外部依赖，支持 WAL 模式实时读取。
+> 使用 Node.js 内置 `node:sqlite` 模块读取 SQLite 数据库，零外部依赖；JSONL 客户端直接读取文件系统。
 >
-> Uses Node.js built-in `node:sqlite` module — zero external dependencies, supports WAL mode for live reading.
+> Uses Node.js built-in `node:sqlite` for SQLite databases — zero external dependencies. JSONL-based clients are read directly from the filesystem.
+
+## 支持的 AI 客户端 / Supported AI Clients
+
+| 客户端 / Client | 数据源 / Data Source | 格式 / Format | 状态 / Status |
+|------|---------|------|------|
+| OpenCode | `~/.local/share/opencode/opencode.db` | SQLite | ✅ 完整支持 / Full support |
+| Qoder | `%APPDATA%/Qoder/SharedClientCache/cache/db/local.db` | SQLite | ✅ 完整支持 / Full support |
+| Claude Code | `~/.claude/projects/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
+| Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
+| Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，仅检测 / Encrypted, detect only |
+| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，仅检测 / Encrypted, detect only |
 
 ## 使用 / Usage
 
@@ -37,7 +48,7 @@ ocusage --from 2025-04-01 --to 2025-04-30
 # 只指定起始日期（默认到今天）/ From date to today
 ocusage --from 2025-04-01
 
-# 指定数据库路径 / Custom DB path
+# 指定数据库路径（仅 OpenCode）/ Custom DB path (OpenCode only)
 ocusage --db /path/to/opencode.db
 
 # 输出格式 / Output format
@@ -58,12 +69,38 @@ ocusage compare --a 2025-04 --b 2025-05 --json     # JSON 格式输出
 ocusage compare --a 2025-04 --b 2025-05 --lang en  # English output
 ```
 
-首次运行前确保 [OpenCode](https://opencode.ai) 已使用过至少一次。数据库默认位于：
+### 多客户端选择 / Multi-client Selection
 
-Make sure OpenCode has been used at least once. Database default location:
+通过 `-c/--client` 选项可指定一个或多个 AI 客户端进行查询：
 
-- **Linux/macOS**: `~/.local/share/opencode/opencode.db`
-- **Windows**: `%XDG_DATA_HOME%\opencode\opencode.db` 或 `~/.local/share/opencode/opencode.db`
+Use `-c/--client` to query one or multiple AI clients:
+
+```bash
+ocusage -c all              # 所有检测到的客户端 / All detected clients
+ocusage -c opencode         # 仅 OpenCode / OpenCode only
+ocusage -c qoder            # 仅 Qoder / Qoder only
+ocusage -c claude           # 仅 Claude Code / Claude Code only
+ocusage -c qoder-cli        # 仅 Qoder CLI / Qoder CLI only
+ocusage -c opencode,qoder   # 多客户端组合 / Multiple clients
+```
+
+### 检测命令 / Detect Command
+
+```bash
+ocusage detect              # 检测已安装的 AI 客户端 / Detect installed AI clients
+```
+
+### 配置命令 / Config Command
+
+通过 `config` 子命令可对每个 provider 配置自定义数据库或日志路径，配置持久化保存到本地。
+
+The `config` subcommand persists custom data paths per provider on disk.
+
+```bash
+ocusage config              # 交互式配置 / Interactive configuration
+ocusage config --list       # 列出当前配置 / List current path configuration
+ocusage config --reset      # 重置所有自定义路径 / Reset all custom paths
+```
 
 ## 支持语言 / Supported Languages
 
@@ -105,16 +142,27 @@ Make sure OpenCode has been used at least once. Database default location:
 ## 项目结构 / Project Structure
 
 ```
-cli.mjs      — 入口，参数解析 / Entry point, argument parsing
-report.mjs   — 多格式输出 / Multi-format output (table/JSON/CSV/Markdown)
-i18n.mjs     — 国际化 / Internationalization
-locales/     — 翻译文件 / Translation files (zh-CN, zh-TW, en, ja, ko)
+cli.mjs       — 入口，参数解析 / Entry point, argument parsing
+multi.mjs     — 多客户端编排层 / Multi-client orchestration layer
+config.mjs    — 持久化配置管理 / Persistent configuration management
+report.mjs    — 多格式输出 / Multi-format output (table/JSON/CSV/Markdown)
+i18n.mjs      — 国际化 / Internationalization
+locales/      — 翻译文件 / Translation files (zh-CN, zh-TW, en, ja, ko)
+providers/    — 可插拔 Provider 系统 / Pluggable provider system
+  base.mjs       — 基础类型和工具 / Shared types and utilities
+  opencode.mjs   — OpenCode SQLite provider
+  qoder.mjs      — Qoder SQLite provider
+  claude.mjs     — Claude Code JSONL provider
+  qoder-cli.mjs  — Qoder CLI JSONL provider
+  trae.mjs       — Trae IDE (SQLCipher, 仅检测 / detect only)
+  trae-solo.mjs  — Trae Solo (SQLCipher, 仅检测 / detect only)
+  index.mjs      — Provider 注册表与自动检测 / Provider registry and auto-detection
 ```
 
 ## 要求 / Requirements
 
 - Node.js >= 22.5.0
-- [OpenCode](https://opencode.ai) 已安装并使用过 / Installed and used at least once
+- 至少一个受支持的 AI 客户端已安装并使用过 / At least one supported AI client installed and used at least once
 
 ## License
 

@@ -1,6 +1,6 @@
 {
   "name": "@geeeger/ocusage",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "OpenCode daily token usage report CLI",
   "bin": {
     "ocusage": "./cli.mjs"

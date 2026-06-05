@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.0.1...v3.1.0) (2026-06-05)
+
+
+### Features
+
+* 支持快捷日期别名 ([ccbf02d](https://github.com/geeeger-pkgs/ocusage/commit/ccbf02d92820d722a582c22132359bb91020e14c))
+
+
+### Bug Fixes
+
+* config --reset 保留 locale 设置 ([f472e59](https://github.com/geeeger-pkgs/ocusage/commit/f472e59de0f6101224e6655ae9c661b67f2377be))
+
 ## [3.0.1](https://github.com/geeeger-pkgs/ocusage/compare/v3.0.0...v3.0.1) (2026-06-05)
 
 

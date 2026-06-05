@@ -430,3 +430,187 @@ export function printCompareReport(statsA, statsB, opts = {}) {
   compareGrouped(statsA.byProject, statsB.byProject, `📊 ${t("byProjectTitle")}`.replace("📊 ", ""), t("project"));
   compareGrouped(statsA.byProvider, statsB.byProvider, `📊 ${t("byProviderTitle")}`.replace("📊 ", ""), t("provider"));
 }
+
+/**
+ * Multi-client report — shows combined stats with per-client breakdown.
+ */
+export function printMultiClientReport(combinedStats, clientResults, opts = {}) {
+  const format = opts.format || "table";
+  const dateLabel = opts.dateLabel || combinedStats.date;
+
+  if (format === "json") {
+    const output = {
+      date: dateLabel,
+      combined: {
+        total: combinedStats.total,
+        byModel: serializeMap(combinedStats.byModel),
+        byProject: serializeMap(combinedStats.byProject),
+        byProvider: serializeMap(combinedStats.byProvider),
+      },
+      clients: {},
+    };
+    for (const { id, name, stats } of clientResults) {
+      output.clients[id] = {
+        name,
+        total: stats.total,
+        byModel: serializeMap(stats.byModel),
+        byProject: serializeMap(stats.byProject),
+        byProvider: serializeMap(stats.byProvider),
+      };
+    }
+    console.log(JSON.stringify(output, null, 2));
+    return;
+  }
+
+  if (format === "csv") {
+    // CSV header with client column
+    console.log(
+      [
+        t("client"),
+        t("csvGroup"),
+        t("csvName"),
+        t("requests"),
+        t("inputTokens"),
+        t("outputTokens"),
+        t("toolCalls"),
+        t("cacheRead"),
+        t("cacheWrite"),
+        t("totalTokens"),
+      ].join(","),
+    );
+    for (const { name, stats } of clientResults) {
+      console.log(
+        [
+          name,
+          t("groupTotal"),
+          "-",
+          stats.total.requests,
+          stats.total.inputTokens,
+          stats.total.outputTokens,
+          stats.total.toolCalls,
+          stats.total.cacheRead,
+          stats.total.cacheWrite,
+          stats.total.totalTokens,
+        ].join(","),
+      );
+      for (const [mname, s] of stats.byModel) {
+        if (isAllZero(s)) continue;
+        console.log(
+          [
+            name,
+            t("groupModel"),
+            csvEscape(mname),
+            s.requests,
+            s.inputTokens,
+            s.outputTokens,
+            s.toolCalls,
+            s.cacheRead,
+            s.cacheWrite,
+            s.totalTokens,
+          ].join(","),
+        );
+      }
+    }
+    // Combined total
+    console.log(
+      [
+        t("all"),
+        t("groupTotal"),
+        "-",
+        combinedStats.total.requests,
+        combinedStats.total.inputTokens,
+        combinedStats.total.outputTokens,
+        combinedStats.total.toolCalls,
+        combinedStats.total.cacheRead,
+        combinedStats.total.cacheWrite,
+        combinedStats.total.totalTokens,
+      ].join(","),
+    );
+    return;
+  }
+
+  // Table format (default) — show per-client breakdown then combined
+  console.log(chalk.bold(t("multiClientTitle", { date: dateLabel })));
+
+  // Per-client totals summary table
+  console.log(chalk.bold(`\n${t("clientBreakdown")}`));
+  const summaryHeaders = [t("client"), ...COL_HEADERS()];
+  const summaryTable = makeTable(summaryHeaders);
+  for (const { id, name, stats } of clientResults) {
+    const s = stats.total;
+    const clientColor =
+      id === "opencode"
+        ? chalk.green
+        : id === "qoder"
+          ? chalk.blue
+          : id === "qoder-cli"
+            ? chalk.blueBright
+            : id === "claude"
+              ? chalk.magenta
+              : chalk.yellow;
+    summaryTable.push([
+      clientColor.bold(name),
+      formatNumber(s.requests),
+      formatNumber(s.inputTokens),
+      formatNumber(s.outputTokens),
+      formatNumber(s.toolCalls),
+      formatNumber(s.cacheRead),
+      formatNumber(s.cacheWrite),
+      chalk.yellow.bold(formatNumber(s.totalTokens)),
+    ]);
+  }
+  // Grand total row
+  summaryTable.push([
+    chalk.bold(t("all")),
+    formatNumber(combinedStats.total.requests),
+    formatNumber(combinedStats.total.inputTokens),
+    formatNumber(combinedStats.total.outputTokens),
+    formatNumber(combinedStats.total.toolCalls),
+    formatNumber(combinedStats.total.cacheRead),
+    formatNumber(combinedStats.total.cacheWrite),
+    chalk.yellow.bold(formatNumber(combinedStats.total.totalTokens)),
+  ]);
+  console.log(summaryTable.toString());
+
+  // Combined by-model table
+  if (combinedStats.byModel.size > 0) {
+    console.log(chalk.bold(`\n${t("byModelTitle")} (${t("all")})`));
+    const modelTable = makeTable(GROUP_HEADERS(t("model")));
+    for (const [model, s] of combinedStats.byModel) {
+      if (isAllZero(s)) continue;
+      modelTable.push(statRow(model, s, chalk.cyan));
+    }
+    console.log(modelTable.toString());
+  }
+
+  // Combined by-project table
+  if (combinedStats.byProject.size > 0) {
+    console.log(chalk.bold(`\n${t("byProjectTitle")} (${t("all")})`));
+    const projTable = makeTable(GROUP_HEADERS(t("project")));
+    for (const [project, s] of combinedStats.byProject) {
+      if (isAllZero(s)) continue;
+      projTable.push(statRow(project, s, chalk.cyan));
+    }
+    console.log(projTable.toString());
+  }
+
+  // Combined by-provider table
+  if (combinedStats.byProvider.size > 0) {
+    console.log(chalk.bold(`\n${t("byProviderTitle")} (${t("all")})`));
+    const provTable = makeTable(GROUP_HEADERS(t("provider")));
+    for (const [provider, s] of combinedStats.byProvider) {
+      if (isAllZero(s)) continue;
+      provTable.push(statRow(provider, s, chalk.cyan));
+    }
+    console.log(provTable.toString());
+  }
+}
+
+function serializeMap(map) {
+  const obj = {};
+  for (const [k, v] of map) {
+    if (isAllZero(v)) continue;
+    obj[k] = v;
+  }
+  return obj;
+}

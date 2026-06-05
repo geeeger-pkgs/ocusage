@@ -1,37 +1,61 @@
+/**
+ * OpenCode provider — reads from the OpenCode SQLite database.
+ * This is the original ocusage data source.
+ */
+
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { t } from "./i18n.mjs";
+import { EMPTY_STAT, validateDate } from "./base.mjs";
 
-const DEFAULT_DB_PATH = join(
-  process.env.XDG_DATA_HOME || join(homedir(), ".local", "share"),
-  "opencode",
-  "opencode.db",
-);
+const isMac = process.platform === "darwin";
+const isWindows = process.platform === "win32";
 
-export function openDB(dbPath) {
-  const path = dbPath || DEFAULT_DB_PATH;
-  if (!existsSync(path)) {
-    console.error(`Database not found: ${path}`);
-    console.error(`Make sure OpenCode is installed and has been used at least once.`);
-    process.exit(1);
+function getDefaultDBPaths() {
+  const xdgDataDir = process.env.XDG_DATA_HOME || join(homedir(), ".local", "share");
+  const xdgPath = join(xdgDataDir, "opencode", "opencode.db");
+
+  if (isWindows) {
+    const appData = process.env.APPDATA || join(homedir(), "AppData", "Roaming");
+    // OpenCode uses XDG convention on all platforms; check XDG path first, then APPDATA fallback
+    return [xdgPath, join(appData, "opencode", "opencode.db")];
+  }
+  if (isMac) {
+    return [join(homedir(), "Library", "Application Support", "opencode", "opencode.db"), xdgPath];
+  }
+  // Linux
+  return [xdgPath];
+}
+
+const DEFAULT_DB_PATHS = getDefaultDBPaths();
+
+export const name = "OpenCode";
+export const id = "opencode";
+
+export function detect(customPath) {
+  if (customPath) {
+    return existsSync(customPath) ? customPath : null;
+  }
+  for (const path of DEFAULT_DB_PATHS) {
+    if (existsSync(path)) {
+      return path;
+    }
+  }
+  return null;
+}
+
+function openDB(dbPath) {
+  let path = dbPath;
+  if (!path) {
+    path = DEFAULT_DB_PATHS.find((p) => existsSync(p));
+  }
+  if (!path || !existsSync(path)) {
+    return null;
   }
   const db = new DatabaseSync(path);
   db.exec("PRAGMA journal_mode=WAL");
   return db;
-}
-
-export function validateDate(dateStr) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    throw new Error(t("invalidDateFormat", { value: dateStr }));
-  }
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const testDate = new Date(Date.UTC(y, m - 1, d));
-  if (testDate.getUTCFullYear() !== y || testDate.getUTCMonth() !== m - 1 || testDate.getUTCDate() !== d) {
-    throw new Error(t("dateNotExist", { value: dateStr }));
-  }
-  return dateStr;
 }
 
 function _aggregateRows(rows) {
@@ -52,24 +76,14 @@ function _aggregateRows(rows) {
       }
     }
 
-    // Deduplicate messages (one message may have multiple parts)
+    // Deduplicate messages
     if (!seenMessages.has(row.id)) {
       seenMessages.add(row.id);
       messages.push({ id: row.id, data: row.data, directory: row.directory });
     }
   }
 
-  const emptyStat = () => ({
-    requests: 0,
-    inputTokens: 0,
-    outputTokens: 0,
-    toolCalls: 0,
-    cacheRead: 0,
-    cacheWrite: 0,
-    totalTokens: 0,
-  });
-
-  const total = emptyStat();
+  const total = EMPTY_STAT();
   const byModel = new Map();
   const byProject = new Map();
   const byProvider = new Map();
@@ -110,7 +124,7 @@ function _aggregateRows(rows) {
       [byProject, projectName],
       [byProvider, providerID],
     ]) {
-      if (!map.has(key)) map.set(key, emptyStat());
+      if (!map.has(key)) map.set(key, EMPTY_STAT());
       const s = map.get(key);
       s.requests++;
       s.inputTokens += inputTokens;
@@ -137,19 +151,26 @@ function _queryRange(db, startMs, endMs) {
     .all(startMs, endMs, startMs, endMs);
 }
 
-export function getDailyStats(db, dateStr) {
+export function getDailyStats(dbPath, dateStr) {
   const date = dateStr || new Date().toISOString().slice(0, 10);
   validateDate(date);
   const [y, m, d] = date.split("-").map(Number);
   const startMs = Date.UTC(y, m - 1, d, 0, 0, 0);
   const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999);
 
-  const rows = _queryRange(db, startMs, endMs);
-  const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
-  return { total, byModel, byProject, byProvider, date };
+  const db = openDB(dbPath);
+  if (!db) return null;
+
+  try {
+    const rows = _queryRange(db, startMs, endMs);
+    const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
+    return { total, byModel, byProject, byProvider, date, client: id };
+  } finally {
+    db.close();
+  }
 }
 
-export function getDateRangeStats(db, fromDate, toDate) {
+export function getDateRangeStats(dbPath, fromDate, toDate) {
   validateDate(fromDate);
   validateDate(toDate);
 
@@ -159,30 +180,28 @@ export function getDateRangeStats(db, fromDate, toDate) {
   const endMs = Date.UTC(ty, tm - 1, td, 23, 59, 59, 999);
 
   if (startMs > endMs) {
-    throw new Error(t("startAfterEnd", { from: fromDate, to: toDate }));
+    throw new Error(`Start date ${fromDate} is after end date ${toDate}`);
   }
 
-  const rows = _queryRange(db, startMs, endMs);
-  const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
-  return { total, byModel, byProject, byProvider, date: `${fromDate} ~ ${toDate}` };
+  const db = openDB(dbPath);
+  if (!db) return null;
+
+  try {
+    const rows = _queryRange(db, startMs, endMs);
+    const { total, byModel, byProject, byProvider } = _aggregateRows(rows);
+    return {
+      total,
+      byModel,
+      byProject,
+      byProvider,
+      date: `${fromDate} ~ ${toDate}`,
+      client: id,
+    };
+  } finally {
+    db.close();
+  }
 }
 
-export function parsePeriod(period) {
-  // YYYY-MM-DD 格式
-  if (/^\d{4}-\d{2}-\d{2}$/.test(period)) {
-    validateDate(period);
-    return { from: period, to: period };
-  }
-  // YYYY-MM 格式
-  if (/^\d{4}-\d{2}$/.test(period)) {
-    const [y, m] = period.split("-").map(Number);
-    if (m < 1 || m > 12) {
-      throw new Error(t("invalidPeriod", { value: period }));
-    }
-    const from = `${period}-01`;
-    const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
-    const to = `${period}-${String(lastDay).padStart(2, "0")}`;
-    return { from, to };
-  }
-  throw new Error(t("invalidPeriod", { value: period }));
+export function close() {
+  // No-op: we open/close DB per call for safety
 }

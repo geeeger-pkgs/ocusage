@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 export function createTestDB() {
@@ -55,6 +58,52 @@ export const DAY = {
     end: Date.UTC(2025, 3, 20, 23, 59, 59, 999),
   },
 };
+
+/**
+ * Create a file-based temporary SQLite DB for provider-level tests.
+ * Returns { db, dbPath, cleanup } — call cleanup() when done.
+ */
+export function createFileTestDB() {
+  const dir = mkdtempSync(join(tmpdir(), "ocusage-test-"));
+  const dbPath = join(dir, "test.db");
+  const db = new DatabaseSync(dbPath);
+
+  db.exec(`
+    CREATE TABLE session (
+      id TEXT PRIMARY KEY,
+      directory TEXT
+    );
+    CREATE TABLE message (
+      id TEXT PRIMARY KEY,
+      session_id TEXT,
+      data TEXT,
+      time_created INTEGER
+    );
+    CREATE TABLE part (
+      id TEXT PRIMARY KEY,
+      message_id TEXT,
+      data TEXT,
+      time_created INTEGER
+    );
+  `);
+
+  let closed = false;
+  return {
+    db,
+    dbPath,
+    cleanup() {
+      if (!closed) {
+        try {
+          db.close();
+        } catch {
+          /* already closed */
+        }
+        closed = true;
+      }
+      rmSync(dir, { recursive: true, force: true });
+    },
+  };
+}
 
 export function seedTypicalDay(db) {
   insertSession(db, "s1", "/home/user/project-a");

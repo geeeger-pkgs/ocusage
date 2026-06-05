@@ -106,7 +106,6 @@ Make sure OpenCode has been used at least once. Database default location:
 
 ```
 cli.mjs      — 入口，参数解析 / Entry point, argument parsing
-db.mjs       — 数据库读取与统计、时段解析 / DB access, aggregation, period parsing
 report.mjs   — 多格式输出 / Multi-format output (table/JSON/CSV/Markdown)
 i18n.mjs     — 国际化 / Internationalization
 locales/     — 翻译文件 / Translation files (zh-CN, zh-TW, en, ja, ko)

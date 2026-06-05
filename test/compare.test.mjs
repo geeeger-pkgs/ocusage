@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parsePeriod } from "../db.mjs";
 import { setLocale } from "../i18n.mjs";
+import { parsePeriod } from "../providers/base.mjs";
 import { formatChangeRate, formatDiff, printCompareReport } from "../report.mjs";
 
 setLocale("zh-CN");
@@ -31,21 +31,21 @@ describe("parsePeriod", () => {
   });
 
   it("throws on invalid format", () => {
-    assert.throws(() => parsePeriod("abc"), /时段格式无效/);
-    assert.throws(() => parsePeriod("2025"), /时段格式无效/);
-    assert.throws(() => parsePeriod("2025-1"), /时段格式无效/);
+    assert.throws(() => parsePeriod("abc"), /Invalid period/);
+    assert.throws(() => parsePeriod("2025"), /Invalid period/);
+    assert.throws(() => parsePeriod("2025-1"), /Invalid period/);
   });
 
   it("throws on invalid month (month 13)", () => {
-    assert.throws(() => parsePeriod("2025-13"), /时段格式无效/);
+    assert.throws(() => parsePeriod("2025-13"), /Invalid period/);
   });
 
   it("throws on invalid month (month 0)", () => {
-    assert.throws(() => parsePeriod("2025-00"), /时段格式无效/);
+    assert.throws(() => parsePeriod("2025-00"), /Invalid period/);
   });
 
   it("throws on non-existent date in YYYY-MM-DD format", () => {
-    assert.throws(() => parsePeriod("2025-02-29"), /日期不存在/);
+    assert.throws(() => parsePeriod("2025-02-29"), /Date does not exist/);
   });
 });
 

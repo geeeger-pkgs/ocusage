@@ -30,6 +30,7 @@ node cli.mjs
 | Qoder | `%APPDATA%/Qoder/SharedClientCache/cache/db/local.db` | SQLite | ✅ 完整支持 / Full support |
 | Claude Code | `~/.claude/projects/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
 | Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
+| CodeWhale | `~/.codewhale/sessions/*.json` | JSON | ✅ 完整支持 / Full support |
 | Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，仅检测 / Encrypted, detect only |
 | Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，仅检测 / Encrypted, detect only |
 
@@ -89,6 +90,7 @@ ocusage -c opencode         # 仅 OpenCode / OpenCode only
 ocusage -c qoder            # 仅 Qoder / Qoder only
 ocusage -c claude           # 仅 Claude Code / Claude Code only
 ocusage -c qoder-cli        # 仅 Qoder CLI / Qoder CLI only
+ocusage -c codewhale        # 仅 CodeWhale / CodeWhale only
 ocusage -c opencode,qoder   # 多客户端组合 / Multiple clients
 ```
 
@@ -162,6 +164,7 @@ providers/    — 可插拔 Provider 系统 / Pluggable provider system
   qoder.mjs      — Qoder SQLite provider
   claude.mjs     — Claude Code JSONL provider
   qoder-cli.mjs  — Qoder CLI JSONL provider
+  codewhale.mjs  — CodeWhale JSON session provider
   trae.mjs       — Trae IDE (SQLCipher, 仅检测 / detect only)
   trae-solo.mjs  — Trae Solo (SQLCipher, 仅检测 / detect only)
   index.mjs      — Provider 注册表与自动检测 / Provider registry and auto-detection

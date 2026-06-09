@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.1.0...v3.2.0) (2026-06-09)
+
+
+### Features
+
+* 支持 CodeWhale 客户端 token 用量查询 ([f4a65db](https://github.com/geeeger-pkgs/ocusage/commit/f4a65db389d1ac4baa25af00e7e85afd0bac0e9f))
+
+
+### Bug Fixes
+
+* **qoder:** count tool calls from role=tool messages and tool.requested events ([7881cd8](https://github.com/geeeger-pkgs/ocusage/commit/7881cd8b2fa4146a2571240ace39e2a5be26da00))
+
 ## [3.1.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.0.1...v3.1.0) (2026-06-05)
 
 

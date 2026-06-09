@@ -16,7 +16,7 @@
  * All tokens are attributed to inputTokens for internal consistency.
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { EMPTY_STAT, validateDate } from "./base.mjs";

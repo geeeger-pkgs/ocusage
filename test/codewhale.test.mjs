@@ -161,7 +161,7 @@ function createTestFixtures() {
 describe("CodeWhale provider", () => {
   const TODAY = "2026-06-08";
   const YESTERDAY = "2026-06-07";
-  const OLD_DATE = "2026-06-01";
+  const _OLD_DATE = "2026-06-01";
 
   describe("module exports", () => {
     it("exposes correct name and id", () => {

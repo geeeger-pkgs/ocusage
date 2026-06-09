@@ -4,17 +4,11 @@
 
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { describe, it } from "node:test";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { describe, it } from "node:test";
 import { setLocale } from "../i18n.mjs";
-import {
-  detect,
-  getDailyStats,
-  getDateRangeStats,
-  name,
-  id,
-} from "../providers/codewhale.mjs";
+import { detect, getDailyStats, getDateRangeStats, id, name } from "../providers/codewhale.mjs";
 
 setLocale("zh-CN");
 
@@ -73,20 +67,17 @@ function createTestFixtures() {
 
   // --- Session 1: today, project-a, deepseek-v4-pro, 50000 tokens ---
   // 4 assistant messages, 2 of them have tool_use blocks (1 and 2)
-  const s1 = makeSession(
-    baseMeta("s1", "2026-06-08T10:00:00.000Z", 50000, "deepseek-v4-pro", "/home/user/project-a"),
-    [
-      makeUserMsg(),
-      makeAssistantMsg(1),      // assistant #1, 1 tool_use
-      makeUserMsg(),
-      makeAssistantMsg(0),      // assistant #2, 0 tool_use
-      makeUserMsg(),
-      makeAssistantMsg(2),      // assistant #3, 2 tool_use
-      makeUserMsg(),
-      makeAssistantMsg(0),      // assistant #4, 0 tool_use
-      makeUserMsg(),            // user msgs don't count
-    ],
-  );
+  const s1 = makeSession(baseMeta("s1", "2026-06-08T10:00:00.000Z", 50000, "deepseek-v4-pro", "/home/user/project-a"), [
+    makeUserMsg(),
+    makeAssistantMsg(1), // assistant #1, 1 tool_use
+    makeUserMsg(),
+    makeAssistantMsg(0), // assistant #2, 0 tool_use
+    makeUserMsg(),
+    makeAssistantMsg(2), // assistant #3, 2 tool_use
+    makeUserMsg(),
+    makeAssistantMsg(0), // assistant #4, 0 tool_use
+    makeUserMsg(), // user msgs don't count
+  ]);
 
   // --- Session 2: yesterday, project-b, deepseek-v4-flash, 30000 tokens ---
   // 3 assistant messages, 1 has a tool_use block
@@ -94,48 +85,37 @@ function createTestFixtures() {
     baseMeta("s2", "2026-06-07T14:00:00.000Z", 30000, "deepseek-v4-flash", "/home/user/project-b"),
     [
       makeUserMsg(),
-      makeAssistantMsg(1),      // assistant #1, 1 tool_use
+      makeAssistantMsg(1), // assistant #1, 1 tool_use
       makeUserMsg(),
-      makeAssistantMsg(0),      // assistant #2
-      makeAssistantMsg(0),      // assistant #3
+      makeAssistantMsg(0), // assistant #2
+      makeAssistantMsg(0), // assistant #3
     ],
   );
 
   // --- Session 3: older, project-a, gpt-4o, 15000 tokens ---
   // 2 assistant messages, 0 tool_use
-  const s3 = makeSession(
-    baseMeta("s3", "2026-06-01T08:00:00.000Z", 15000, "gpt-4o", "/home/user/project-a"),
-    [
-      makeUserMsg(),
-      makeAssistantMsg(0),
-      makeUserMsg(),
-      makeAssistantMsg(0),
-    ],
-  );
+  const s3 = makeSession(baseMeta("s3", "2026-06-01T08:00:00.000Z", 15000, "gpt-4o", "/home/user/project-a"), [
+    makeUserMsg(),
+    makeAssistantMsg(0),
+    makeUserMsg(),
+    makeAssistantMsg(0),
+  ]);
 
   // --- Session 4: yesterday, windows path, deepseek-v4-pro, 8000 tokens ---
   // 2 assistant messages, 1 tool_use
   const s4 = makeSession(
     baseMeta("s4", "2026-06-07T16:00:00.000Z", 8000, "deepseek-v4-pro", "C:\\Users\\testuser\\project-c"),
-    [
-      makeUserMsg(),
-      makeAssistantMsg(1),
-      makeUserMsg(),
-      makeAssistantMsg(0),
-    ],
+    [makeUserMsg(), makeAssistantMsg(1), makeUserMsg(), makeAssistantMsg(0)],
   );
 
   // --- Session 5: today, project-a, deepseek-v4-pro, 12000 tokens ---
   // 3 assistant messages, 1 tool_use
-  const s5 = makeSession(
-    baseMeta("s5", "2026-06-08T12:00:00.000Z", 12000, "deepseek-v4-pro", "/home/user/project-a"),
-    [
-      makeUserMsg(),
-      makeAssistantMsg(1),
-      makeAssistantMsg(0),
-      makeAssistantMsg(0),
-    ],
-  );
+  const s5 = makeSession(baseMeta("s5", "2026-06-08T12:00:00.000Z", 12000, "deepseek-v4-pro", "/home/user/project-a"), [
+    makeUserMsg(),
+    makeAssistantMsg(1),
+    makeAssistantMsg(0),
+    makeAssistantMsg(0),
+  ]);
 
   // Excluded: latest.json (checkpoint pointer)
   const checkpoint = makeSession(
@@ -335,10 +315,7 @@ describe("CodeWhale provider", () => {
     it("throws on invalid date range (from > to)", () => {
       const { sessionsDir, cleanup } = createTestFixtures();
       try {
-        assert.throws(
-          () => getDateRangeStats(sessionsDir, TODAY, YESTERDAY),
-          /Start date .* after end date/,
-        );
+        assert.throws(() => getDateRangeStats(sessionsDir, TODAY, YESTERDAY), /Start date .* after end date/);
       } finally {
         cleanup();
       }

@@ -51,7 +51,29 @@ function aggregateMessages(rows) {
   const byProject = new Map();
   const byProvider = new Map();
 
+  let lastModelKey = null;
+
   for (const row of rows) {
+    // Count tool role messages as tool calls
+    // Tool messages don't have token_info; role="tool" itself represents a tool invocation
+    if (row.role === "tool") {
+      const projectName = row.project_uri ? basename(row.project_uri) : "(global)";
+      total.toolCalls++;
+
+      if (lastModelKey) {
+        if (!byModel.has(lastModelKey)) byModel.set(lastModelKey, EMPTY_STAT());
+        byModel.get(lastModelKey).toolCalls++;
+      }
+
+      if (!byProject.has(projectName)) byProject.set(projectName, EMPTY_STAT());
+      byProject.get(projectName).toolCalls++;
+
+      if (!byProvider.has("qoder")) byProvider.set("qoder", EMPTY_STAT());
+      byProvider.get("qoder").toolCalls++;
+
+      continue;
+    }
+
     // Only count assistant messages with token_info
     if (row.role !== "assistant") continue;
 
@@ -77,11 +99,11 @@ function aggregateMessages(rows) {
     const totalTokens = inputTokens + outputTokens;
     const modelKey = `${modelInfo?.model_key || "unknown"} (qoder)`;
     const projectName = row.project_uri ? basename(row.project_uri) : "(global)";
+    lastModelKey = modelKey;
 
     total.requests++;
     total.inputTokens += inputTokens;
     total.outputTokens += outputTokens;
-    total.toolCalls += 0; // Qoder doesn't expose tool_calls in chat_message
     total.cacheRead += cacheRead;
     total.cacheWrite += cacheWrite;
     total.totalTokens += totalTokens;
@@ -96,7 +118,6 @@ function aggregateMessages(rows) {
       s.requests++;
       s.inputTokens += inputTokens;
       s.outputTokens += outputTokens;
-      s.toolCalls += 0;
       s.cacheRead += cacheRead;
       s.cacheWrite += cacheWrite;
       s.totalTokens += totalTokens;

@@ -132,6 +132,7 @@ function aggregateFromFiles(fileEntries, startDate, endDate) {
     }
 
     const lines = content.split("\n");
+    let lastModelKey = null;
     for (const line of lines) {
       if (!line.trim()) continue;
 
@@ -142,10 +143,6 @@ function aggregateFromFiles(fileEntries, startDate, endDate) {
         continue;
       }
 
-      // Only process model.response.completed events
-      if (event.type !== "model.response.completed") continue;
-      if (!event.data) continue;
-
       // Determine date from timestamp
       const ts = event.ts;
       if (!ts) continue;
@@ -154,17 +151,39 @@ function aggregateFromFiles(fileEntries, startDate, endDate) {
       // Filter by date range
       if (eventDate < startDate || eventDate > endDate) continue;
 
+      // Count tool.requested events as tool calls
+      if (event.type === "tool.requested") {
+        total.toolCalls++;
+
+        if (lastModelKey) {
+          if (!byModel.has(lastModelKey)) byModel.set(lastModelKey, EMPTY_STAT());
+          byModel.get(lastModelKey).toolCalls++;
+        }
+
+        if (!byProject.has(projectName)) byProject.set(projectName, EMPTY_STAT());
+        byProject.get(projectName).toolCalls++;
+
+        if (!byProvider.has("qoder-cli")) byProvider.set("qoder-cli", EMPTY_STAT());
+        byProvider.get("qoder-cli").toolCalls++;
+
+        continue;
+      }
+
+      // Only process model.response.completed events for token data
+      if (event.type !== "model.response.completed") continue;
+      if (!event.data) continue;
+
       const inputTokens = event.data.input_tokens || 0;
       const outputTokens = event.data.output_tokens || 0;
       const cacheRead = event.data.cache_read_input_tokens || 0;
       const cacheWrite = event.data.cache_creation_input_tokens || 0;
       const totalTokens = inputTokens + outputTokens;
       const modelKey = `${event.data.model || "unknown"} (qoder-cli)`;
+      lastModelKey = modelKey;
 
       total.requests++;
       total.inputTokens += inputTokens;
       total.outputTokens += outputTokens;
-      total.toolCalls += 0;
       total.cacheRead += cacheRead;
       total.cacheWrite += cacheWrite;
       total.totalTokens += totalTokens;
@@ -179,7 +198,6 @@ function aggregateFromFiles(fileEntries, startDate, endDate) {
         s.requests++;
         s.inputTokens += inputTokens;
         s.outputTokens += outputTokens;
-        s.toolCalls += 0;
         s.cacheRead += cacheRead;
         s.cacheWrite += cacheWrite;
         s.totalTokens += totalTokens;

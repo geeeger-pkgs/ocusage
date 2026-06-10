@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1](https://github.com/geeeger-pkgs/ocusage/compare/v3.2.0...v3.2.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* 多客户端汇总中筛除零用量客户端 ([55a5c56](https://github.com/geeeger-pkgs/ocusage/commit/55a5c5663861917201c0e179be02fa16ba0b075c))
+
 ## [3.2.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.1.0...v3.2.0) (2026-06-09)
 
 

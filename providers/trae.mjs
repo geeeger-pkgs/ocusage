@@ -21,7 +21,7 @@ import { basename, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { getEncryptionKey, setEncryptionKey } from "../config.mjs";
 import { EMPTY_STAT, validateDate } from "./base.mjs";
-import { decryptDatabase, cleanupDecrypted, readFirstPage, verifyEncKey } from "./helpers/trae-crypto.mjs";
+import { cleanupDecrypted, decryptDatabase, readFirstPage, verifyEncKey } from "./helpers/trae-crypto.mjs";
 import { extractTraeKey } from "./helpers/trae-key-extract.mjs";
 
 const isMac = process.platform === "darwin";
@@ -156,7 +156,7 @@ function aggregateMessages(rows) {
     const outputTokens = tu.completion_tokens || 0;
     const cacheRead = tu.cache_read_input_tokens || 0;
     const cacheWrite = tu.cache_creation_input_tokens || 0;
-    const totalTokens = (tu.total_tokens) || (inputTokens + outputTokens);
+    const totalTokens = tu.total_tokens || inputTokens + outputTokens;
 
     // Skip rows with no actual usage
     if (inputTokens === 0 && outputTokens === 0) continue;
@@ -229,7 +229,7 @@ export function getDailyStats(dbPath, dateStr) {
   // Trae uses Unix seconds, not milliseconds
   const startSec = Math.floor(Date.UTC(y, m - 1, d, 0, 0, 0) / 1000);
   const endSec = Math.floor(Date.UTC(y, m - 1, d, 23, 59, 59, 999) / 1000);
-  const { db, encrypted, notFound } = tryOpenDB(dbPath);
+  const { db, notFound } = tryOpenDB(dbPath);
   if (notFound) return null;
   if (!db) return { encrypted: true, client: id, date };
   try {
@@ -249,7 +249,7 @@ export function getDateRangeStats(dbPath, fromDate, toDate) {
   const startSec = Math.floor(Date.UTC(fy, fm - 1, fd, 0, 0, 0) / 1000);
   const endSec = Math.floor(Date.UTC(ty, tm - 1, td, 23, 59, 59, 999) / 1000);
   if (startSec > endSec) throw new Error(`Start date ${fromDate} is after end date ${toDate}`);
-  const { db, encrypted, notFound } = tryOpenDB(dbPath);
+  const { db, notFound } = tryOpenDB(dbPath);
   if (notFound) return null;
   if (!db) return { encrypted: true, client: id, date: `${fromDate} ~ ${toDate}` };
   try {

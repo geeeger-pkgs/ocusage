@@ -48,26 +48,23 @@ export function extractTraeKey(dbPath, options = {}) {
   }
 
   // PowerShell 只需要盐值，不需要完整页面
-  const psCmd = [
-    `& "${psScript}"`,
-    `-SaltHex '${saltHex}'`,
-    `-TimeoutSeconds ${Math.ceil(timeoutMs / 1000)}`,
-  ].join(" ");
+  const psCmd = [`& "${psScript}"`, `-SaltHex '${saltHex}'`, `-TimeoutSeconds ${Math.ceil(timeoutMs / 1000)}`].join(
+    " ",
+  );
 
   try {
-    const stdout = execFileSync(
-      "powershell.exe",
-      ["-NoProfile", "-NonInteractive", "-Command", psCmd],
-      {
-        encoding: "utf8",
-        timeout: timeoutMs,
-        maxBuffer: 10 * 1024 * 1024,
-        windowsHide: true,
-      },
-    );
+    const stdout = execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", psCmd], {
+      encoding: "utf8",
+      timeout: timeoutMs,
+      maxBuffer: 10 * 1024 * 1024,
+      windowsHide: true,
+    });
 
     // 解析 JSON 输出（取最后一行）
-    const lines = stdout.trim().split("\n").filter((l) => l.trim());
+    const lines = stdout
+      .trim()
+      .split("\n")
+      .filter((l) => l.trim());
     const jsonLine = lines[lines.length - 1];
     const result = JSON.parse(jsonLine);
 

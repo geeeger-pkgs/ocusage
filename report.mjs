@@ -450,6 +450,7 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
       clients: {},
     };
     for (const { id, name, stats } of clientResults) {
+      if (isAllZero(stats.total)) continue;
       output.clients[id] = {
         name,
         total: stats.total,
@@ -479,6 +480,7 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
       ].join(","),
     );
     for (const { name, stats } of clientResults) {
+      if (isAllZero(stats.total)) continue;
       console.log(
         [
           name,
@@ -538,6 +540,7 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
   const summaryTable = makeTable(summaryHeaders);
   for (const { id, name, stats } of clientResults) {
     const s = stats.total;
+    if (isAllZero(s)) continue;
     const clientColor =
       id === "opencode"
         ? chalk.green

@@ -47,6 +47,7 @@
     "i18n.mjs",
     "providers",
     "locales",
+    "scripts",
     "LICENSE"
   ],
   "devDependencies": {

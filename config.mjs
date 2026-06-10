@@ -66,7 +66,11 @@ export function getConfigPath() {
 export function loadConfig() {
   const configPath = getConfigPath();
   if (!existsSync(configPath)) {
-    return { ...EMPTY_CONFIG, customPaths: { ...EMPTY_CONFIG.customPaths }, encryptionKeys: { ...EMPTY_CONFIG.encryptionKeys } };
+    return {
+      ...EMPTY_CONFIG,
+      customPaths: { ...EMPTY_CONFIG.customPaths },
+      encryptionKeys: { ...EMPTY_CONFIG.encryptionKeys },
+    };
   }
   try {
     const raw = readFileSync(configPath, "utf8");
@@ -74,10 +78,15 @@ export function loadConfig() {
     return {
       locale: typeof parsed.locale === "string" ? parsed.locale : undefined,
       customPaths: parsed.customPaths && typeof parsed.customPaths === "object" ? { ...parsed.customPaths } : {},
-      encryptionKeys: parsed.encryptionKeys && typeof parsed.encryptionKeys === "object" ? { ...parsed.encryptionKeys } : {},
+      encryptionKeys:
+        parsed.encryptionKeys && typeof parsed.encryptionKeys === "object" ? { ...parsed.encryptionKeys } : {},
     };
   } catch {
-    return { ...EMPTY_CONFIG, customPaths: { ...EMPTY_CONFIG.customPaths }, encryptionKeys: { ...EMPTY_CONFIG.encryptionKeys } };
+    return {
+      ...EMPTY_CONFIG,
+      customPaths: { ...EMPTY_CONFIG.customPaths },
+      encryptionKeys: { ...EMPTY_CONFIG.encryptionKeys },
+    };
   }
 }
 

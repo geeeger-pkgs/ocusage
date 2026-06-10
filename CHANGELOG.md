@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.2.1...v3.3.0) (2026-06-10)
+
+
+### Features
+
+* trae sqlcipher 解密支持 ([ac68387](https://github.com/geeeger-pkgs/ocusage/commit/ac68387cba307a5e83caeb9351b7b579b3741456))
+
+
+### Bug Fixes
+
+* 移除未使用的 encrypted 变量，修复 lint 问题 ([21c031d](https://github.com/geeeger-pkgs/ocusage/commit/21c031d0242bbe8c6d2425ae0c382eb61f9a2935))
+
 ## [3.2.1](https://github.com/geeeger-pkgs/ocusage/compare/v3.2.0...v3.2.1) (2026-06-10)
 
 

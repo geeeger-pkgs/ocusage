@@ -29,7 +29,10 @@ program
   .option("--from <date>", "range start date (YYYY-MM-DD or date alias)")
   .option("--to <date>", "range end date (YYYY-MM-DD or date alias)")
   .option("--db <path>", "custom database/data path (single client mode only)")
-  .option("-c, --client <names>", "client filter: opencode,qoder,qoder-cli,claude,codewhale,trae,trae-solo or 'all'")
+  .option(
+    "-c, --client <names>",
+    "client filter: opencode,mimocode,qoder,qoder-cli,claude,codewhale,trae,trae-solo or 'all'",
+  )
   .option("-f, --format <type>", "output format: table, json, csv, markdown", "table")
   .option("-j, --json", "output as JSON (alias for --format json)")
   // --lang: choices are SUPPORTED_LOCALES (zh-CN, zh-TW, en, ja, ko)
@@ -181,7 +184,10 @@ program
   .requiredOption("-a, --a <period>", "period A (YYYY-MM or YYYY-MM-DD)")
   .requiredOption("-b, --b <period>", "period B (YYYY-MM or YYYY-MM-DD)")
   .option("--db <path>", "custom database/data path (single client mode only)")
-  .option("-c, --client <names>", "client filter: opencode,qoder,qoder-cli,claude,codewhale,trae,trae-solo or 'all'")
+  .option(
+    "-c, --client <names>",
+    "client filter: opencode,mimocode,qoder,qoder-cli,claude,codewhale,trae,trae-solo or 'all'",
+  )
   .option("-f, --format <type>", "output format: table, json, csv, markdown", "table")
   .option("-j, --json", "output as JSON (alias for --format json)")
   .option("-l, --lang <locale>", "output language")

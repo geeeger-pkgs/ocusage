@@ -9,6 +9,7 @@
 
 import * as claude from "./claude.mjs";
 import * as codewhale from "./codewhale.mjs";
+import * as mimocode from "./mimocode.mjs";
 import * as opencode from "./opencode.mjs";
 import * as qoder from "./qoder.mjs";
 import * as qoderCli from "./qoder-cli.mjs";
@@ -17,6 +18,7 @@ import * as traeSolo from "./trae-solo.mjs";
 
 const PROVIDERS = [
   { id: opencode.id, name: opencode.name, module: opencode },
+  { id: mimocode.id, name: mimocode.name, module: mimocode },
   { id: qoder.id, name: qoder.name, module: qoder },
   { id: qoderCli.id, name: qoderCli.name, module: qoderCli },
   { id: claude.id, name: claude.name, module: claude },

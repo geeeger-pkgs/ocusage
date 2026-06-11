@@ -513,6 +513,40 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
           ].join(","),
         );
       }
+      for (const [pname, s] of stats.byProject) {
+        if (isAllZero(s)) continue;
+        console.log(
+          [
+            name,
+            t("groupProject"),
+            csvEscape(pname),
+            s.requests,
+            s.inputTokens,
+            s.outputTokens,
+            s.toolCalls,
+            s.cacheRead,
+            s.cacheWrite,
+            s.totalTokens,
+          ].join(","),
+        );
+      }
+      for (const [prname, s] of stats.byProvider) {
+        if (isAllZero(s)) continue;
+        console.log(
+          [
+            name,
+            t("groupProvider"),
+            csvEscape(prname),
+            s.requests,
+            s.inputTokens,
+            s.outputTokens,
+            s.toolCalls,
+            s.cacheRead,
+            s.cacheWrite,
+            s.totalTokens,
+          ].join(","),
+        );
+      }
     }
     // Combined total
     console.log(

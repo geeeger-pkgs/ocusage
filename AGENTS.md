@@ -46,7 +46,7 @@ node cli.mjs config --reset      # clear all custom paths
 | Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ Full support |
 | CodeWhale | `~/.codewhale/sessions/*.json` | JSON | ✅ Full support |
 | Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 decryption (Windows) |
-| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 decryption (Windows) |
+| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ Encrypted DB — key not extractable |
 
 ## Architecture
 
@@ -76,7 +76,8 @@ node cli.mjs config --reset      # clear all custom paths
 - Claude Code parses JSONL files from the filesystem
 - Qoder CLI parses session JSONL files from the filesystem
 - CodeWhale parses session JSON files from the filesystem (metadata + message counting)
-- Trae and Trae Solo databases are SQLCipher 4 encrypted — decrypted via key extraction from process memory (Windows only)
+- Trae database is SQLCipher 4 encrypted — decrypted via key extraction from process memory (Windows only)
+- Trae Solo database is SQLCipher encrypted — key randomly generated, not stored in memory, cannot be extracted
 - Node >= 22.5.0 required
 - Tests: `npm test` · Lint: `npm run lint` · CI: GitHub Actions (`.github/workflows/ci.yml`)
 - UI strings are in Chinese (表头、分隔符等)

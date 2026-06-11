@@ -33,7 +33,7 @@ node cli.mjs
 | Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
 | CodeWhale | `~/.codewhale/sessions/*.json` | JSON | ✅ 完整支持 / Full support |
 | Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 解密（Windows）/ Decryption (Windows) |
-| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 解密（Windows）/ Decryption (Windows) |
+| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，密钥不可提取 / Encrypted, key not extractable |
 
 ## 使用 / Usage
 

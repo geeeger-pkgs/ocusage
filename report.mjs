@@ -13,11 +13,7 @@ export function formatNumber(n) {
 function makeTable(headers) {
   return new Table({
     head: headers,
-    style: {
-      head: ["cyan", "bold"],
-      border: ["gray"],
-      compact: true,
-    },
+    style: { head: ["cyan", "bold"], border: ["gray"], compact: true },
     chars: {
       top: "─",
       "top-mid": "┬",
@@ -61,6 +57,7 @@ const COL_HEADERS = () => [
   t("cacheWrite"),
   t("totalTokens"),
 ];
+
 const GROUP_HEADERS = (first) => [
   first,
   t("requests"),
@@ -72,86 +69,64 @@ const GROUP_HEADERS = (first) => [
   t("totalTokens"),
 ];
 
+const STAT_FIELDS = ["requests", "inputTokens", "outputTokens", "toolCalls", "cacheRead", "cacheWrite", "totalTokens"];
+
 function csvEscape(val) {
   const s = String(val);
   return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-function printCSV(stats) {
-  const headers = [
-    t("csvGroup"),
-    t("csvName"),
-    t("requests"),
-    t("inputTokens"),
-    t("outputTokens"),
-    t("toolCalls"),
-    t("cacheRead"),
-    t("cacheWrite"),
-    t("totalTokens"),
-  ];
-  console.log(headers.join(","));
-  console.log(
-    [
-      t("groupTotal"),
-      "-",
-      stats.total.requests,
-      stats.total.inputTokens,
-      stats.total.outputTokens,
-      stats.total.toolCalls,
-      stats.total.cacheRead,
-      stats.total.cacheWrite,
-      stats.total.totalTokens,
-    ].join(","),
-  );
+function serializeMap(map) {
+  const obj = {};
+  for (const [k, v] of map) {
+    if (isAllZero(v)) continue;
+    obj[k] = v;
+  }
+  return obj;
+}
 
-  for (const [name, s] of stats.byModel) {
+// --- CSV helpers ---
+
+const CSV_HEADERS = () => [t("csvGroup"), t("csvName"), ...STAT_FIELDS.map((f) => t(f))];
+
+function csvStatFields(s) {
+  return STAT_FIELDS.map((f) => s[f]);
+}
+
+function csvGroupMapRows(groupLabel, map) {
+  const rows = [];
+  for (const [name, s] of map) {
     if (isAllZero(s)) continue;
-    console.log(
-      [
-        t("groupModel"),
-        csvEscape(name),
-        s.requests,
-        s.inputTokens,
-        s.outputTokens,
-        s.toolCalls,
-        s.cacheRead,
-        s.cacheWrite,
-        s.totalTokens,
-      ].join(","),
+    rows.push([groupLabel, csvEscape(name), ...csvStatFields(s)].join(","));
+  }
+  return rows;
+}
+
+function printCSV(stats) {
+  console.log(CSV_HEADERS().join(","));
+  console.log([t("groupTotal"), "-", ...csvStatFields(stats.total)].join(","));
+  console.log(csvGroupMapRows(t("groupModel"), stats.byModel).join("\n"));
+  console.log(csvGroupMapRows(t("groupProject"), stats.byProject).join("\n"));
+  console.log(csvGroupMapRows(t("groupProvider"), stats.byProvider).join("\n"));
+}
+
+// --- Markdown helpers ---
+
+const MD_SEP = "|------|--------|-----------|-----------|---------|---------|---------|-----------|";
+
+function mdGroupHeader(nameHeader) {
+  return `| ${nameHeader} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`;
+}
+
+function mdGroupRows(map) {
+  const rows = [];
+  for (const [name, s] of map) {
+    if (isAllZero(s)) continue;
+    rows.push(
+      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
     );
   }
-  for (const [name, s] of stats.byProject) {
-    if (isAllZero(s)) continue;
-    console.log(
-      [
-        t("groupProject"),
-        csvEscape(name),
-        s.requests,
-        s.inputTokens,
-        s.outputTokens,
-        s.toolCalls,
-        s.cacheRead,
-        s.cacheWrite,
-        s.totalTokens,
-      ].join(","),
-    );
-  }
-  for (const [name, s] of stats.byProvider) {
-    if (isAllZero(s)) continue;
-    console.log(
-      [
-        t("groupProvider"),
-        csvEscape(name),
-        s.requests,
-        s.inputTokens,
-        s.outputTokens,
-        s.toolCalls,
-        s.cacheRead,
-        s.cacheWrite,
-        s.totalTokens,
-      ].join(","),
-    );
-  }
+  return rows.join("\n");
 }
 
 function printMarkdown(stats) {
@@ -159,136 +134,26 @@ function printMarkdown(stats) {
   console.log();
   console.log(t("mdTotal"));
   console.log();
-  console.log(
-    `| ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
-  );
-  console.log("|--------|-----------|-----------|---------|---------|---------|-----------|");
   const tot = stats.total;
+  console.log(mdGroupHeader(t("requests")));
+  console.log(MD_SEP);
   console.log(
     `| ${tot.requests} | ${tot.inputTokens} | ${tot.outputTokens} | ${tot.toolCalls} | ${tot.cacheRead} | ${tot.cacheWrite} | ${tot.totalTokens} |`,
   );
 
-  // 按模型
-  console.log(`\n${t("mdByModel")}\n`);
-  console.log(
-    `| ${t("model")} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
-  );
-  console.log("|------|--------|-----------|-----------|---------|---------|---------|-----------|");
-  for (const [name, s] of stats.byModel) {
-    if (isAllZero(s)) continue;
-    console.log(
-      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
-    );
-  }
-
-  // 按项目
-  console.log(`\n${t("mdByProject")}\n`);
-  console.log(
-    `| ${t("project")} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
-  );
-  console.log("|------|--------|-----------|-----------|---------|---------|---------|-----------|");
-  for (const [name, s] of stats.byProject) {
-    if (isAllZero(s)) continue;
-    console.log(
-      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
-    );
-  }
-
-  // 按供应商
-  console.log(`\n${t("mdByProvider")}\n`);
-  console.log(
-    `| ${t("provider")} | ${t("requests")} | ${t("inputTokens")} | ${t("outputTokens")} | ${t("toolCalls")} | ${t("cacheRead")} | ${t("cacheWrite")} | ${t("totalTokens")} |`,
-  );
-  console.log("|--------|--------|-----------|-----------|---------|---------|---------|-----------|");
-  for (const [name, s] of stats.byProvider) {
-    if (isAllZero(s)) continue;
-    console.log(
-      `| ${name} | ${s.requests} | ${s.inputTokens} | ${s.outputTokens} | ${s.toolCalls} | ${s.cacheRead} | ${s.cacheWrite} | ${s.totalTokens} |`,
-    );
+  for (const [label, map] of [
+    [t("mdByModel"), stats.byModel],
+    [t("mdByProject"), stats.byProject],
+    [t("mdByProvider"), stats.byProvider],
+  ]) {
+    console.log(`\n${label}\n`);
+    console.log(mdGroupHeader(t("model")));
+    console.log(MD_SEP);
+    console.log(mdGroupRows(map));
   }
 }
 
-export function printReport(stats, opts = {}) {
-  const format = opts.format || (opts.json ? "json" : "table");
-
-  if (format === "json") {
-    const serializeMap = (map) => {
-      const obj = {};
-      for (const [k, v] of map) {
-        if (isAllZero(v)) continue;
-        obj[k] = v;
-      }
-      return obj;
-    };
-    console.log(
-      JSON.stringify(
-        {
-          date: stats.date,
-          total: stats.total,
-          byModel: serializeMap(stats.byModel),
-          byProject: serializeMap(stats.byProject),
-          byProvider: serializeMap(stats.byProvider),
-        },
-        null,
-        2,
-      ),
-    );
-    return;
-  }
-
-  if (format === "csv") {
-    printCSV(stats);
-    return;
-  }
-
-  if (format === "markdown") {
-    printMarkdown(stats);
-    return;
-  }
-
-  // table format (default)
-  if (stats.total.requests === 0) {
-    console.log(chalk.gray(t("noData", { date: stats.date })));
-    return;
-  }
-
-  console.log(chalk.bold(t("overallData", { date: stats.date })));
-  const t1 = makeTable(COL_HEADERS());
-  t1.push([
-    formatNumber(stats.total.requests),
-    formatNumber(stats.total.inputTokens),
-    formatNumber(stats.total.outputTokens),
-    formatNumber(stats.total.toolCalls),
-    formatNumber(stats.total.cacheRead),
-    formatNumber(stats.total.cacheWrite),
-    chalk.yellow.bold(formatNumber(stats.total.totalTokens)),
-  ]);
-  console.log(t1.toString());
-
-  console.log(chalk.bold(`\n${t("byModelTitle")}`));
-  const t2 = makeTable(GROUP_HEADERS(t("model")));
-  for (const [model, s] of stats.byModel) {
-    if (isAllZero(s)) continue;
-    t2.push(statRow(model, s, chalk.cyan));
-  }
-  console.log(t2.toString());
-
-  console.log(chalk.bold(`\n${t("byProjectTitle")}`));
-  const t3 = makeTable(GROUP_HEADERS(t("project")));
-  for (const [project, s] of stats.byProject) {
-    if (isAllZero(s)) continue;
-    t3.push(statRow(project, s, chalk.cyan));
-  }
-  console.log(t3.toString());
-
-  console.log(chalk.bold(`\n${t("byProviderTitle")}`));
-  const t4 = makeTable(GROUP_HEADERS(t("provider")));
-  for (const [provider, s] of stats.byProvider) {
-    if (isAllZero(s)) continue;
-    t4.push(statRow(provider, s, chalk.cyan));
-  }
-  console.log(t4.toString());
-}
+// --- Compare helpers ---
 
 export function formatDiff(a, b) {
   const diff = b - a;
@@ -317,7 +182,6 @@ const COMPARE_FIELDS = () => [
 
 function compareGrouped(mapA, mapB, groupTitle, nameHeader) {
   const allKeys = new Set([...mapA.keys(), ...mapB.keys()]);
-
   console.log(chalk.bold(`\n${groupTitle}`));
   const tbl = makeTable([nameHeader, "A", "B", t("diff"), t("changeRate")]);
   for (const key of allKeys) {
@@ -333,6 +197,91 @@ function compareGrouped(mapA, mapB, groupTitle, nameHeader) {
     ]);
   }
   console.log(tbl.toString());
+}
+
+// --- Client colors (data-driven) ---
+
+const CLIENT_COLORS = {
+  opencode: chalk.green,
+  mimocode: chalk.greenBright,
+  qoder: chalk.blue,
+  "qoder-cli": chalk.blueBright,
+  claude: chalk.magenta,
+  codewhale: chalk.hex("#FFA500"),
+  trae: chalk.red,
+  "trae-solo": chalk.redBright,
+};
+const DEFAULT_CLIENT_COLOR = chalk.yellow;
+
+function getClientColor(id) {
+  return CLIENT_COLORS[id] || DEFAULT_CLIENT_COLOR;
+}
+
+// --- Public API ---
+
+export function printReport(stats, opts = {}) {
+  const format = opts.format || (opts.json ? "json" : "table");
+
+  if (format === "json") {
+    console.log(
+      JSON.stringify(
+        {
+          date: stats.date,
+          total: stats.total,
+          byModel: serializeMap(stats.byModel),
+          byProject: serializeMap(stats.byProject),
+          byProvider: serializeMap(stats.byProvider),
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (format === "csv") {
+    printCSV(stats);
+    return;
+  }
+  if (format === "markdown") {
+    printMarkdown(stats);
+    return;
+  }
+
+  // table format (default)
+  if (stats.total.requests === 0) {
+    console.log(chalk.gray(t("noData", { date: stats.date })));
+    return;
+  }
+
+  console.log(chalk.bold(t("overallData", { date: stats.date })));
+  const t1 = makeTable(COL_HEADERS());
+  t1.push([
+    formatNumber(stats.total.requests),
+    formatNumber(stats.total.inputTokens),
+    formatNumber(stats.total.outputTokens),
+    formatNumber(stats.total.toolCalls),
+    formatNumber(stats.total.cacheRead),
+    formatNumber(stats.total.cacheWrite),
+    chalk.yellow.bold(formatNumber(stats.total.totalTokens)),
+  ]);
+  console.log(t1.toString());
+
+  for (const [label, map] of [
+    [t("byModelTitle"), stats.byModel],
+    [t("byProjectTitle"), stats.byProject],
+    [t("byProviderTitle"), stats.byProvider],
+  ]) {
+    console.log(chalk.bold(`\n${label}`));
+    const tbl = makeTable(
+      GROUP_HEADERS(label.includes("Model") ? t("model") : label.includes("Project") ? t("project") : t("provider")),
+    );
+    for (const [name, s] of map) {
+      if (isAllZero(s)) continue;
+      tbl.push(statRow(name, s, chalk.cyan));
+    }
+    console.log(tbl.toString());
+  }
 }
 
 export function printCompareReport(statsA, statsB, opts = {}) {
@@ -393,8 +342,8 @@ export function printCompareReport(statsA, statsB, opts = {}) {
   if (format === "csv") {
     console.log(["metric", labelA, labelB, t("diff"), t("changeRate")].join(","));
     for (const [field, label] of COMPARE_FIELDS()) {
-      const a = statsA.total[field];
-      const b = statsB.total[field];
+      const a = statsA.total[field],
+        b = statsB.total[field];
       console.log([label, a, b, b - a, formatChangeRate(a, b)].join(","));
     }
     return;
@@ -406,8 +355,8 @@ export function printCompareReport(statsA, statsB, opts = {}) {
     console.log(`| | ${labelA} | ${labelB} | ${t("diff")} | ${t("changeRate")} |`);
     console.log("|---|---|---|---|---|");
     for (const [field, label] of COMPARE_FIELDS()) {
-      const a = statsA.total[field];
-      const b = statsB.total[field];
+      const a = statsA.total[field],
+        b = statsB.total[field];
       console.log(
         `| ${label} | ${formatNumber(a)} | ${formatNumber(b)} | ${formatDiff(a, b)} | ${formatChangeRate(a, b)} |`,
       );
@@ -417,16 +366,14 @@ export function printCompareReport(statsA, statsB, opts = {}) {
 
   // table format (default)
   console.log(chalk.bold(t("compareTitle", { a: labelA, b: labelB })));
-
   const tbl = makeTable(["", labelA, labelB, t("diff"), t("changeRate")]);
   for (const [field, label] of COMPARE_FIELDS()) {
-    const a = statsA.total[field];
-    const b = statsB.total[field];
+    const a = statsA.total[field],
+      b = statsB.total[field];
     tbl.push([chalk.cyan(label), formatNumber(a), formatNumber(b), formatDiff(a, b), formatChangeRate(a, b)]);
   }
   console.log(tbl.toString());
 
-  // Grouped comparisons
   compareGrouped(statsA.byModel, statsB.byModel, `📊 ${t("byModelTitle")}`.replace("📊 ", ""), t("model"));
   compareGrouped(statsA.byProject, statsB.byProject, `📊 ${t("byProjectTitle")}`.replace("📊 ", ""), t("project"));
   compareGrouped(statsA.byProvider, statsB.byProvider, `📊 ${t("byProviderTitle")}`.replace("📊 ", ""), t("provider"));
@@ -465,129 +412,40 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
   }
 
   if (format === "csv") {
-    // CSV header with client column
-    console.log(
-      [
-        t("client"),
-        t("csvGroup"),
-        t("csvName"),
-        t("requests"),
-        t("inputTokens"),
-        t("outputTokens"),
-        t("toolCalls"),
-        t("cacheRead"),
-        t("cacheWrite"),
-        t("totalTokens"),
-      ].join(","),
-    );
+    console.log([t("client"), ...CSV_HEADERS()].join(","));
     for (const { name, stats } of clientResults) {
       if (isAllZero(stats.total)) continue;
+      console.log([name, t("groupTotal"), "-", ...csvStatFields(stats.total)].join(","));
       console.log(
-        [
-          name,
-          t("groupTotal"),
-          "-",
-          stats.total.requests,
-          stats.total.inputTokens,
-          stats.total.outputTokens,
-          stats.total.toolCalls,
-          stats.total.cacheRead,
-          stats.total.cacheWrite,
-          stats.total.totalTokens,
-        ].join(","),
+        csvGroupMapRows(t("groupModel"), stats.byModel)
+          .map((r) => `${name},${r}`)
+          .join("\n"),
       );
-      for (const [mname, s] of stats.byModel) {
-        if (isAllZero(s)) continue;
-        console.log(
-          [
-            name,
-            t("groupModel"),
-            csvEscape(mname),
-            s.requests,
-            s.inputTokens,
-            s.outputTokens,
-            s.toolCalls,
-            s.cacheRead,
-            s.cacheWrite,
-            s.totalTokens,
-          ].join(","),
-        );
-      }
-      for (const [pname, s] of stats.byProject) {
-        if (isAllZero(s)) continue;
-        console.log(
-          [
-            name,
-            t("groupProject"),
-            csvEscape(pname),
-            s.requests,
-            s.inputTokens,
-            s.outputTokens,
-            s.toolCalls,
-            s.cacheRead,
-            s.cacheWrite,
-            s.totalTokens,
-          ].join(","),
-        );
-      }
-      for (const [prname, s] of stats.byProvider) {
-        if (isAllZero(s)) continue;
-        console.log(
-          [
-            name,
-            t("groupProvider"),
-            csvEscape(prname),
-            s.requests,
-            s.inputTokens,
-            s.outputTokens,
-            s.toolCalls,
-            s.cacheRead,
-            s.cacheWrite,
-            s.totalTokens,
-          ].join(","),
-        );
-      }
+      console.log(
+        csvGroupMapRows(t("groupProject"), stats.byProject)
+          .map((r) => `${name},${r}`)
+          .join("\n"),
+      );
+      console.log(
+        csvGroupMapRows(t("groupProvider"), stats.byProvider)
+          .map((r) => `${name},${r}`)
+          .join("\n"),
+      );
     }
-    // Combined total
-    console.log(
-      [
-        t("all"),
-        t("groupTotal"),
-        "-",
-        combinedStats.total.requests,
-        combinedStats.total.inputTokens,
-        combinedStats.total.outputTokens,
-        combinedStats.total.toolCalls,
-        combinedStats.total.cacheRead,
-        combinedStats.total.cacheWrite,
-        combinedStats.total.totalTokens,
-      ].join(","),
-    );
+    console.log([t("all"), t("groupTotal"), "-", ...csvStatFields(combinedStats.total)].join(","));
     return;
   }
 
-  // Table format (default) — show per-client breakdown then combined
+  // Table format (default)
   console.log(chalk.bold(t("multiClientTitle", { date: dateLabel })));
 
-  // Per-client totals summary table
   console.log(chalk.bold(`\n${t("clientBreakdown")}`));
-  const summaryHeaders = [t("client"), ...COL_HEADERS()];
-  const summaryTable = makeTable(summaryHeaders);
+  const summaryTable = makeTable([t("client"), ...COL_HEADERS()]);
   for (const { id, name, stats } of clientResults) {
     const s = stats.total;
     if (isAllZero(s)) continue;
-    const clientColor =
-      id === "opencode"
-        ? chalk.green
-        : id === "qoder"
-          ? chalk.blue
-          : id === "qoder-cli"
-            ? chalk.blueBright
-            : id === "claude"
-              ? chalk.magenta
-              : chalk.yellow;
     summaryTable.push([
-      clientColor.bold(name),
+      getClientColor(id).bold(name),
       formatNumber(s.requests),
       formatNumber(s.inputTokens),
       formatNumber(s.outputTokens),
@@ -597,7 +455,6 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
       chalk.yellow.bold(formatNumber(s.totalTokens)),
     ]);
   }
-  // Grand total row
   summaryTable.push([
     chalk.bold(t("all")),
     formatNumber(combinedStats.total.requests),
@@ -610,45 +467,18 @@ export function printMultiClientReport(combinedStats, clientResults, opts = {}) 
   ]);
   console.log(summaryTable.toString());
 
-  // Combined by-model table
-  if (combinedStats.byModel.size > 0) {
-    console.log(chalk.bold(`\n${t("byModelTitle")} (${t("all")})`));
-    const modelTable = makeTable(GROUP_HEADERS(t("model")));
-    for (const [model, s] of combinedStats.byModel) {
+  for (const [label, titleKey, map] of [
+    [t("model"), t("byModelTitle"), combinedStats.byModel],
+    [t("project"), t("byProjectTitle"), combinedStats.byProject],
+    [t("provider"), t("byProviderTitle"), combinedStats.byProvider],
+  ]) {
+    if (map.size === 0) continue;
+    console.log(chalk.bold(`\n${titleKey} (${t("all")})`));
+    const tbl = makeTable(GROUP_HEADERS(label));
+    for (const [name, s] of map) {
       if (isAllZero(s)) continue;
-      modelTable.push(statRow(model, s, chalk.cyan));
+      tbl.push(statRow(name, s, chalk.cyan));
     }
-    console.log(modelTable.toString());
+    console.log(tbl.toString());
   }
-
-  // Combined by-project table
-  if (combinedStats.byProject.size > 0) {
-    console.log(chalk.bold(`\n${t("byProjectTitle")} (${t("all")})`));
-    const projTable = makeTable(GROUP_HEADERS(t("project")));
-    for (const [project, s] of combinedStats.byProject) {
-      if (isAllZero(s)) continue;
-      projTable.push(statRow(project, s, chalk.cyan));
-    }
-    console.log(projTable.toString());
-  }
-
-  // Combined by-provider table
-  if (combinedStats.byProvider.size > 0) {
-    console.log(chalk.bold(`\n${t("byProviderTitle")} (${t("all")})`));
-    const provTable = makeTable(GROUP_HEADERS(t("provider")));
-    for (const [provider, s] of combinedStats.byProvider) {
-      if (isAllZero(s)) continue;
-      provTable.push(statRow(provider, s, chalk.cyan));
-    }
-    console.log(provTable.toString());
-  }
-}
-
-function serializeMap(map) {
-  const obj = {};
-  for (const [k, v] of map) {
-    if (isAllZero(v)) continue;
-    obj[k] = v;
-  }
-  return obj;
 }

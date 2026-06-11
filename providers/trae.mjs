@@ -20,7 +20,7 @@ import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { getEncryptionKey, setEncryptionKey } from "../config.mjs";
-import { EMPTY_STAT, validateDate } from "./base.mjs";
+import { EMPTY_STAT, encryptedResult, validateDate } from "./base.mjs";
 import { cleanupDecrypted, decryptDatabase, readFirstPage, verifyEncKey } from "./helpers/trae-crypto.mjs";
 import { extractTraeKey } from "./helpers/trae-key-extract.mjs";
 
@@ -231,7 +231,7 @@ export function getDailyStats(dbPath, dateStr) {
   const endSec = Math.floor(Date.UTC(y, m - 1, d, 23, 59, 59, 999) / 1000);
   const { db, notFound } = tryOpenDB(dbPath);
   if (notFound) return null;
-  if (!db) return { encrypted: true, client: id, date };
+  if (!db) return encryptedResult(id, date);
   try {
     const rows = queryRange(db, startSec, endSec);
     const { total, byModel, byProject, byProvider } = aggregateMessages(rows);
@@ -251,7 +251,7 @@ export function getDateRangeStats(dbPath, fromDate, toDate) {
   if (startSec > endSec) throw new Error(`Start date ${fromDate} is after end date ${toDate}`);
   const { db, notFound } = tryOpenDB(dbPath);
   if (notFound) return null;
-  if (!db) return { encrypted: true, client: id, date: `${fromDate} ~ ${toDate}` };
+  if (!db) return encryptedResult(id, `${fromDate} ~ ${toDate}`);
   try {
     const rows = queryRange(db, startSec, endSec);
     const { total, byModel, byProject, byProvider } = aggregateMessages(rows);

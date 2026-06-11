@@ -19,7 +19,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { EMPTY_STAT, validateDate } from "./base.mjs";
+import { EMPTY_STAT, encryptedResult, validateDate } from "./base.mjs";
 
 const isMac = process.platform === "darwin";
 const isWindows = process.platform === "win32";
@@ -135,7 +135,7 @@ export function getDailyStats(dbPath, dateStr) {
   const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999);
   const { db, encrypted, notFound } = tryOpenDB(dbPath);
   if (notFound) return null;
-  if (encrypted) return { encrypted: true, client: id, date };
+  if (encrypted) return encryptedResult(id, date);
   try {
     const rows = queryRange(db, startMs, endMs);
     const { total, byModel, byProject, byProvider } = aggregateMessages(rows);
@@ -155,7 +155,7 @@ export function getDateRangeStats(dbPath, fromDate, toDate) {
   if (startMs > endMs) throw new Error(`Start date ${fromDate} is after end date ${toDate}`);
   const { db, encrypted, notFound } = tryOpenDB(dbPath);
   if (notFound) return null;
-  if (encrypted) return { encrypted: true, client: id, date: `${fromDate} ~ ${toDate}` };
+  if (encrypted) return encryptedResult(id, `${fromDate} ~ ${toDate}`);
   try {
     const rows = queryRange(db, startMs, endMs);
     const { total, byModel, byProject, byProvider } = aggregateMessages(rows);

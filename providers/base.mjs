@@ -4,10 +4,15 @@
  * Each provider must implement:
  *   - name: string           — Human-readable client name
  *   - id: string             — Unique identifier for CLI flags
- *   - detect(): string|null  — Return data path if client is installed & has data, else null
- *   - getDailyStats(dateStr): StatsResult
- *   - getDateRangeStats(from, to): StatsResult
+ *   - detect(customPath?): string|null  — Return data path if installed & has data, else null
+ *   - getDailyStats(dbPath?, dateStr?): ProviderResult
+ *   - getDateRangeStats(dbPath?, fromDate, toDate?): ProviderResult
  *   - close(): void          — Release any resources (DB handles, etc.)
+ *
+ * ProviderResult (union type):
+ *   - StatsResult            — Successful query (see below)
+ *   - null                   — Provider not available (DB/directory not found)
+ *   - EncryptedResult        — DB exists but is encrypted (see below)
  *
  * StatsResult shape:
  *   {
@@ -17,6 +22,13 @@
  *     byProvider: Map<string, StatEntry>,
  *     date: string,
  *     client: string  — provider id
+ *   }
+ *
+ * EncryptedResult shape:
+ *   {
+ *     encrypted: true,
+ *     client: string,  — provider id
+ *     date: string
  *   }
  */
 
@@ -33,6 +45,13 @@ export const EMPTY_STAT = () => ({
   cacheWrite: 0,
   totalTokens: 0,
 });
+
+/**
+ * Create an EncryptedResult for providers with encrypted databases.
+ */
+export function encryptedResult(clientId, date) {
+  return { encrypted: true, client: clientId, date };
+}
 
 /**
  * Check if a stat entry is all zeros.

@@ -174,6 +174,56 @@ export function aggregateRows(rows) {
 }
 
 /**
+ * Create a SQLite provider with standard getDailyStats/getDateRangeStats/detect/close.
+ * Each provider only needs to supply: id, name, resolvePath, query, aggregate.
+ */
+export function createSQLiteProvider({ id, name, resolvePath, query, aggregate }) {
+  function detect(customPath) {
+    if (customPath) return existsSync(customPath) ? customPath : null;
+    const path = resolvePath();
+    return path && existsSync(path) ? path : null;
+  }
+
+  function getDailyStats(dbPath, dateStr) {
+    const date = dateStr || new Date().toISOString().slice(0, 10);
+    validateDate(date);
+    const [y, m, d] = date.split("-").map(Number);
+    const startMs = Date.UTC(y, m - 1, d, 0, 0, 0);
+    const endMs = Date.UTC(y, m - 1, d, 23, 59, 59, 999);
+    const db = openDB(dbPath || resolvePath());
+    if (!db) return null;
+    try {
+      const rows = query(db, startMs, endMs);
+      const { total, byModel, byProject, byProvider } = aggregate(rows);
+      return { total, byModel, byProject, byProvider, date, client: id };
+    } finally {
+      db.close();
+    }
+  }
+
+  function getDateRangeStats(dbPath, fromDate, toDate) {
+    validateDate(fromDate);
+    validateDate(toDate);
+    const [fy, fm, fd] = fromDate.split("-").map(Number);
+    const [ty, tm, td] = toDate.split("-").map(Number);
+    const startMs = Date.UTC(fy, fm - 1, fd, 0, 0, 0);
+    const endMs = Date.UTC(ty, tm - 1, td, 23, 59, 59, 999);
+    if (startMs > endMs) throw new Error(`Start date ${fromDate} is after end date ${toDate}`);
+    const db = openDB(dbPath || resolvePath());
+    if (!db) return null;
+    try {
+      const rows = query(db, startMs, endMs);
+      const { total, byModel, byProject, byProvider } = aggregate(rows);
+      return { total, byModel, byProject, byProvider, date: `${fromDate} ~ ${toDate}`, client: id };
+    } finally {
+      db.close();
+    }
+  }
+
+  return { id, name, detect, getDailyStats, getDateRangeStats, close: () => {} };
+}
+
+/**
  * Validate a date string (YYYY-MM-DD) and return it.
  * Throws on invalid format.
  */

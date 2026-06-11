@@ -352,6 +352,24 @@ export function printCompareReport(statsA, statsB, opts = {}) {
             ? "N/A"
             : `${(((statsB.total[field] - statsA.total[field]) / statsA.total[field]) * 100).toFixed(1)}%`;
     }
+
+    const compareGroupedJSON = (mapA, mapB) => {
+      const allKeys = new Set([...mapA.keys(), ...mapB.keys()]);
+      const result = {};
+      for (const key of allKeys) {
+        const a = mapA.get(key) || EMPTY_STAT();
+        const b = mapB.get(key) || EMPTY_STAT();
+        if (isAllZero(a) && isAllZero(b)) continue;
+        result[key] = {
+          a: a.totalTokens,
+          b: b.totalTokens,
+          diff: b.totalTokens - a.totalTokens,
+          changeRate: formatChangeRate(a.totalTokens, b.totalTokens),
+        };
+      }
+      return result;
+    };
+
     console.log(
       JSON.stringify(
         {
@@ -361,6 +379,9 @@ export function printCompareReport(statsA, statsB, opts = {}) {
           statsB: statsB.total,
           diff,
           changeRate,
+          byModel: compareGroupedJSON(statsA.byModel, statsB.byModel),
+          byProject: compareGroupedJSON(statsA.byProject, statsB.byProject),
+          byProvider: compareGroupedJSON(statsA.byProvider, statsB.byProvider),
         },
         null,
         2,

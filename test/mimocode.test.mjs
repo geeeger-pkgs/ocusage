@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import { setLocale } from "../i18n.mjs";
 import { getDailyStats, getDateRangeStats } from "../providers/mimocode.mjs";
-import { createFileTestDB, DAY, seedTypicalDay } from "./fixtures/helpers.mjs";
+import { createFileTestDB, seedTypicalDay } from "./fixtures/helpers.mjs";
 
 setLocale("zh-CN");
 

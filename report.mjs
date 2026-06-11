@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import Table from "cli-table3";
 import { t } from "./i18n.mjs";
+import { EMPTY_STAT, isAllZero } from "./providers/base.mjs";
 
 export function formatNumber(n) {
   if (n === null || n === undefined || n === 0) return "0";
@@ -49,18 +50,6 @@ function statRow(label, s, labelChalk) {
     formatNumber(s.cacheWrite),
     chalk.yellow.bold(formatNumber(s.totalTokens)),
   ];
-}
-
-function isAllZero(s) {
-  return (
-    s.requests === 0 &&
-    s.inputTokens === 0 &&
-    s.outputTokens === 0 &&
-    s.toolCalls === 0 &&
-    s.cacheRead === 0 &&
-    s.cacheWrite === 0 &&
-    s.totalTokens === 0
-  );
 }
 
 const COL_HEADERS = () => [
@@ -328,21 +317,12 @@ const COMPARE_FIELDS = () => [
 
 function compareGrouped(mapA, mapB, groupTitle, nameHeader) {
   const allKeys = new Set([...mapA.keys(), ...mapB.keys()]);
-  const emptyStat = () => ({
-    requests: 0,
-    inputTokens: 0,
-    outputTokens: 0,
-    toolCalls: 0,
-    cacheRead: 0,
-    cacheWrite: 0,
-    totalTokens: 0,
-  });
 
   console.log(chalk.bold(`\n${groupTitle}`));
   const tbl = makeTable([nameHeader, "A", "B", t("diff"), t("changeRate")]);
   for (const key of allKeys) {
-    const sA = mapA.get(key) || emptyStat();
-    const sB = mapB.get(key) || emptyStat();
+    const sA = mapA.get(key) || EMPTY_STAT();
+    const sB = mapB.get(key) || EMPTY_STAT();
     if (isAllZero(sA) && isAllZero(sB)) continue;
     tbl.push([
       chalk.cyan(key),

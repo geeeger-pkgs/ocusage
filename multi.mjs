@@ -10,6 +10,7 @@
  *   const results = getAllStats('2025-04-20', null, { clientFilter: 'opencode,qoder' });
  */
 
+import { addStat, EMPTY_STAT } from "./providers/base.mjs";
 import { detectProviders, getAllProviderStats } from "./providers/index.mjs";
 
 /**
@@ -44,15 +45,7 @@ export function getAllStats(dateStr, toDateStr, opts = {}) {
  * @returns {StatsResult} - Combined stats
  */
 export function aggregateStats(results, dateLabel) {
-  const total = {
-    requests: 0,
-    inputTokens: 0,
-    outputTokens: 0,
-    toolCalls: 0,
-    cacheRead: 0,
-    cacheWrite: 0,
-    totalTokens: 0,
-  };
+  const total = EMPTY_STAT();
   const byModel = new Map();
   const byProject = new Map();
   const byProvider = new Map();
@@ -60,78 +53,21 @@ export function aggregateStats(results, dateLabel) {
   for (const { stats } of results) {
     if (!stats || stats.encrypted) continue;
 
-    total.requests += stats.total.requests;
-    total.inputTokens += stats.total.inputTokens;
-    total.outputTokens += stats.total.outputTokens;
-    total.toolCalls += stats.total.toolCalls;
-    total.cacheRead += stats.total.cacheRead;
-    total.cacheWrite += stats.total.cacheWrite;
-    total.totalTokens += stats.total.totalTokens;
+    addStat(total, stats.total);
 
     for (const [key, val] of stats.byModel) {
-      if (!byModel.has(key)) {
-        byModel.set(key, {
-          requests: 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          toolCalls: 0,
-          cacheRead: 0,
-          cacheWrite: 0,
-          totalTokens: 0,
-        });
-      }
-      const s = byModel.get(key);
-      s.requests += val.requests;
-      s.inputTokens += val.inputTokens;
-      s.outputTokens += val.outputTokens;
-      s.toolCalls += val.toolCalls;
-      s.cacheRead += val.cacheRead;
-      s.cacheWrite += val.cacheWrite;
-      s.totalTokens += val.totalTokens;
+      if (!byModel.has(key)) byModel.set(key, EMPTY_STAT());
+      addStat(byModel.get(key), val);
     }
 
     for (const [key, val] of stats.byProject) {
-      if (!byProject.has(key)) {
-        byProject.set(key, {
-          requests: 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          toolCalls: 0,
-          cacheRead: 0,
-          cacheWrite: 0,
-          totalTokens: 0,
-        });
-      }
-      const s = byProject.get(key);
-      s.requests += val.requests;
-      s.inputTokens += val.inputTokens;
-      s.outputTokens += val.outputTokens;
-      s.toolCalls += val.toolCalls;
-      s.cacheRead += val.cacheRead;
-      s.cacheWrite += val.cacheWrite;
-      s.totalTokens += val.totalTokens;
+      if (!byProject.has(key)) byProject.set(key, EMPTY_STAT());
+      addStat(byProject.get(key), val);
     }
 
     for (const [key, val] of stats.byProvider) {
-      if (!byProvider.has(key)) {
-        byProvider.set(key, {
-          requests: 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          toolCalls: 0,
-          cacheRead: 0,
-          cacheWrite: 0,
-          totalTokens: 0,
-        });
-      }
-      const s = byProvider.get(key);
-      s.requests += val.requests;
-      s.inputTokens += val.inputTokens;
-      s.outputTokens += val.outputTokens;
-      s.toolCalls += val.toolCalls;
-      s.cacheRead += val.cacheRead;
-      s.cacheWrite += val.cacheWrite;
-      s.totalTokens += val.totalTokens;
+      if (!byProvider.has(key)) byProvider.set(key, EMPTY_STAT());
+      addStat(byProvider.get(key), val);
     }
   }
 

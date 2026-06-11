@@ -1,7 +1,7 @@
 {
   "name": "@geeeger/ocusage",
   "version": "3.4.0",
-  "description": "OpenCode daily token usage report CLI",
+  "description": "AI client daily token usage report CLI — supports OpenCode, MiMoCode, Qoder, Claude Code, CodeWhale, and more",
   "bin": {
     "ocusage": "./cli.mjs"
   },
@@ -17,6 +17,12 @@
   },
   "keywords": [
     "opencode",
+    "mimocode",
+    "qoder",
+    "claude",
+    "codewhale",
+    "trae",
+    "ai",
     "usage",
     "token",
     "cost",

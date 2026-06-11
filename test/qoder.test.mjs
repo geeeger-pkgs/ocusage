@@ -35,7 +35,11 @@ function createQoderTestDB() {
     dbPath,
     cleanup() {
       if (!closed) {
-        try { db.close(); } catch { /* already closed */ }
+        try {
+          db.close();
+        } catch {
+          /* already closed */
+        }
         closed = true;
       }
       rmSync(dir, { recursive: true, force: true });
@@ -50,7 +54,9 @@ function seedQoderDay(db) {
   db.prepare("INSERT INTO chat_session (session_id, project_uri) VALUES (?, ?)").run("sess2", "/home/user/project-b");
 
   // assistant message with tokens
-  db.prepare("INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)").run(
+  db.prepare(
+    "INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)",
+  ).run(
     "sess1",
     "assistant",
     JSON.stringify({ prompt_tokens: 1000, completion_tokens: 500, cached_tokens: 200 }),
@@ -59,16 +65,14 @@ function seedQoderDay(db) {
   );
 
   // tool message (counts as tool call)
-  db.prepare("INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)").run(
-    "sess1",
-    "tool",
-    null,
-    null,
-    DAY_MS + 3601000,
-  );
+  db.prepare(
+    "INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)",
+  ).run("sess1", "tool", null, null, DAY_MS + 3601000);
 
   // another assistant message
-  db.prepare("INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)").run(
+  db.prepare(
+    "INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)",
+  ).run(
     "sess2",
     "assistant",
     JSON.stringify({ prompt_tokens: 2000, completion_tokens: 1000, cached_tokens: 0 }),
@@ -77,13 +81,9 @@ function seedQoderDay(db) {
   );
 
   // user message (should be skipped)
-  db.prepare("INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)").run(
-    "sess1",
-    "user",
-    null,
-    null,
-    DAY_MS + 1000,
-  );
+  db.prepare(
+    "INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)",
+  ).run("sess1", "user", null, null, DAY_MS + 1000);
 }
 
 describe("Qoder getDailyStats", () => {
@@ -173,13 +173,9 @@ describe("Qoder getDailyStats", () => {
 
   it("handles malformed token_info gracefully", () => {
     db.prepare("INSERT INTO chat_session (session_id, project_uri) VALUES (?, ?)").run("s-bad", "/project");
-    db.prepare("INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)").run(
-      "s-bad",
-      "assistant",
-      "not-json",
-      null,
-      DAY_MS + 1000,
-    );
+    db.prepare(
+      "INSERT INTO chat_message (session_id, role, token_info, model_info, gmt_create) VALUES (?, ?, ?, ?, ?)",
+    ).run("s-bad", "assistant", "not-json", null, DAY_MS + 1000);
     db.close();
     const result = getDailyStats(dbPath, "2025-04-20");
     assert.equal(result.total.requests, 0);

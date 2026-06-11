@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.5.0...v3.6.0) (2026-06-11)
+
+
+### Features
+
+* add SQLCipher decryption support to Trae Solo provider ([c2af6c0](https://github.com/geeeger-pkgs/ocusage/commit/c2af6c06245106799c47ec0341b139af759d552a))
+
+
+### Bug Fixes
+
+* add byProject/byProvider to multi-client CSV output ([d3fba56](https://github.com/geeeger-pkgs/ocusage/commit/d3fba566c713a1553aa4fcce096a7697b843adb6))
+* revert Trae Solo decryption — key is not extractable per research ([5588a9e](https://github.com/geeeger-pkgs/ocusage/commit/5588a9e933004986a4072c1c49a9c3f671ad3cc8))
+* skip integration tests requiring DB when no AI clients installed ([3b11910](https://github.com/geeeger-pkgs/ocusage/commit/3b11910619f41a87864ba91a4a5ad1846a544f07))
+* use literal key access in integration test ([d5a3c1c](https://github.com/geeeger-pkgs/ocusage/commit/d5a3c1c305d18657a3e00f5be91cadb5e9b734af))
+
 ## [3.5.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.4.0...v3.5.0) (2026-06-11)
 
 

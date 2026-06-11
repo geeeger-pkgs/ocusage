@@ -32,8 +32,8 @@ node cli.mjs
 | Claude Code | `~/.claude/projects/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
 | Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
 | CodeWhale | `~/.codewhale/sessions/*.json` | JSON | ✅ 完整支持 / Full support |
-| Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，仅检测 / Encrypted, detect only |
-| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，仅检测 / Encrypted, detect only |
+| Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 解密（Windows）/ Decryption (Windows) |
+| Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 解密（Windows）/ Decryption (Windows) |
 
 ## 使用 / Usage
 

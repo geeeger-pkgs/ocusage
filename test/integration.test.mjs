@@ -1,5 +1,8 @@
 /**
  * Integration tests — run the CLI end-to-end and verify output.
+ *
+ * Tests that query real databases are skipped when no AI clients are detected
+ * (e.g. on CI).
  */
 
 import assert from "node:assert/strict";
@@ -29,6 +32,14 @@ function run(args, opts = {}) {
   }
 }
 
+let hasClients = false;
+try {
+  const { stdout } = run(["detect"]);
+  hasClients = !stdout.includes("No AI") && !stdout.includes("未检测到");
+} catch {
+  hasClients = false;
+}
+
 describe("CLI integration", () => {
   it("prints version", () => {
     const { stdout } = run(["--version"]);
@@ -48,14 +59,14 @@ describe("CLI integration", () => {
     assert.ok(stdout.includes("Detected") || stdout.includes("检测") || stdout.includes("No AI"));
   });
 
-  it("runs default command (opencode) with --json", () => {
+  it("runs default command (opencode) with --json", { skip: !hasClients && "no AI clients installed" }, () => {
     const { stdout, exitCode } = run(["--client", "opencode", "--date", "2025-04-20", "--json"]);
     assert.equal(exitCode, 0);
     const parsed = JSON.parse(stdout);
     assert.ok(parsed.opencode !== undefined || Object.keys(parsed).length === 0);
   });
 
-  it("runs with --client all --json", () => {
+  it("runs with --client all --json", { skip: !hasClients && "no AI clients installed" }, () => {
     const { stdout, exitCode } = run(["--client", "all", "--date", "2025-04-20", "--json"]);
     assert.equal(exitCode, 0);
     const parsed = JSON.parse(stdout);
@@ -72,7 +83,7 @@ describe("CLI integration", () => {
     assert.notEqual(exitCode, 0);
   });
 
-  it("compare command with --json", () => {
+  it("compare command with --json", { skip: !hasClients && "no AI clients installed" }, () => {
     const { stdout, exitCode } = run(["compare", "--a", "2025-04", "--b", "2025-05", "--client", "opencode", "--json"]);
     assert.equal(exitCode, 0);
     const parsed = JSON.parse(stdout);
@@ -86,7 +97,7 @@ describe("CLI integration", () => {
     assert.equal(exitCode, 0);
   });
 
-  it("--lang en produces English output", () => {
+  it("--lang en produces English output", { skip: !hasClients && "no AI clients installed" }, () => {
     const { stdout } = run(["--client", "opencode", "--date", "2025-04-20", "--lang", "en", "--json"]);
     const parsed = JSON.parse(stdout);
     assert.ok(parsed);

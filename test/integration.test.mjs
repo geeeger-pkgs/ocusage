@@ -52,7 +52,7 @@ describe("CLI integration", () => {
     const { stdout, exitCode } = run(["--client", "opencode", "--date", "2025-04-20", "--json"]);
     assert.equal(exitCode, 0);
     const parsed = JSON.parse(stdout);
-    assert.ok(parsed["opencode"] !== undefined || Object.keys(parsed).length === 0);
+    assert.ok(parsed.opencode !== undefined || Object.keys(parsed).length === 0);
   });
 
   it("runs with --client all --json", () => {

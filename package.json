@@ -48,7 +48,6 @@
   "files": [
     "cli.mjs",
     "config.mjs",
-    "multi.mjs",
     "report.mjs",
     "i18n.mjs",
     "providers",

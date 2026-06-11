@@ -7,6 +7,7 @@
  *   const stats = getProviderStats('opencode', date, toDate); // StatsResult | null
  */
 
+import { addStat, EMPTY_STAT } from "./base.mjs";
 import * as claude from "./claude.mjs";
 import * as codewhale from "./codewhale.mjs";
 import * as mimocode from "./mimocode.mjs";
@@ -116,3 +117,36 @@ export function getAllProviderStats(dateStr, toDateStr, customPaths = {}, client
 }
 
 export const AVAILABLE_PROVIDERS = PROVIDERS.map((p) => ({ id: p.id, name: p.name }));
+
+/**
+ * Aggregate multiple client stats into a single combined result.
+ */
+export function aggregateStats(results, dateLabel) {
+  const total = EMPTY_STAT();
+  const byModel = new Map();
+  const byProject = new Map();
+  const byProvider = new Map();
+
+  for (const { stats } of results) {
+    if (!stats || stats.encrypted) continue;
+
+    addStat(total, stats.total);
+
+    for (const [key, val] of stats.byModel) {
+      if (!byModel.has(key)) byModel.set(key, EMPTY_STAT());
+      addStat(byModel.get(key), val);
+    }
+
+    for (const [key, val] of stats.byProject) {
+      if (!byProject.has(key)) byProject.set(key, EMPTY_STAT());
+      addStat(byProject.get(key), val);
+    }
+
+    for (const [key, val] of stats.byProvider) {
+      if (!byProvider.has(key)) byProvider.set(key, EMPTY_STAT());
+      addStat(byProvider.get(key), val);
+    }
+  }
+
+  return { total, byModel, byProject, byProvider, date: dateLabel };
+}

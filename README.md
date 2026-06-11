@@ -155,7 +155,6 @@ ocusage config --reset      # 重置所有自定义路径 / Reset all custom pat
 
 ```
 cli.mjs       — 入口，参数解析 / Entry point, argument parsing
-multi.mjs     — 多客户端编排层 / Multi-client orchestration layer
 config.mjs    — 持久化配置管理 / Persistent configuration management
 report.mjs    — 多格式输出 / Multi-format output (table/JSON/CSV/Markdown)
 i18n.mjs      — 国际化 / Internationalization

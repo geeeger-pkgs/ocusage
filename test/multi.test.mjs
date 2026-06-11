@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { setLocale } from "../i18n.mjs";
-import { aggregateStats } from "../multi.mjs";
+import { aggregateStats } from "../providers/index.mjs";
 
 setLocale("zh-CN");
 

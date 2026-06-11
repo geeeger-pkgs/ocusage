@@ -6,9 +6,8 @@ import { input, Separator, select } from "@inquirer/prompts";
 import { Command } from "commander";
 import { getConfigPath, getCustomPaths, getSavedLocale, loadConfig, saveConfig } from "./config.mjs";
 import { detectLocale, SUPPORTED_LOCALES, setLocale, t } from "./i18n.mjs";
-import { aggregateStats, detectClients, getAllStats } from "./multi.mjs";
 import { parsePeriod, resolveDateAlias, validateDate } from "./providers/base.mjs";
-import { AVAILABLE_PROVIDERS, detectProviders } from "./providers/index.mjs";
+import { AVAILABLE_PROVIDERS, aggregateStats, detectProviders, getAllProviderStats } from "./providers/index.mjs";
 import { printCompareReport, printMultiClientReport, printReport } from "./report.mjs";
 
 const require = createRequire(import.meta.url);
@@ -65,7 +64,7 @@ function handleMultiClient(opts, clientFilter, format) {
 
     const { dateStr, toDateStr } = resolveDateOptions(opts);
 
-    const results = getAllStats(dateStr, toDateStr, { clientFilter, customPaths });
+    const results = getAllProviderStats(dateStr, toDateStr, customPaths, clientFilter);
 
     // Check if any client was detected
     const validResults = results.filter((r) => r.stats !== null);
@@ -167,7 +166,7 @@ program
     const savedLocale = getSavedLocale();
     setLocale(detectLocale(opts.lang || savedLocale));
     const customPaths = getCustomPaths();
-    const clients = detectClients(customPaths);
+    const clients = detectProviders(customPaths);
     if (clients.length === 0) {
       console.log(t("noClientsDetected") || "No AI clients detected.");
       return;
@@ -216,8 +215,8 @@ function handleMultiClientCompare(opts, clientFilter, format) {
     const rangeA = resolvePeriodInput(opts.a);
     const rangeB = resolvePeriodInput(opts.b);
 
-    const resultsA = getAllStats(rangeA.from, rangeA.to, { clientFilter, customPaths });
-    const resultsB = getAllStats(rangeB.from, rangeB.to, { clientFilter, customPaths });
+    const resultsA = getAllProviderStats(rangeA.from, rangeA.to, customPaths, clientFilter);
+    const resultsB = getAllProviderStats(rangeB.from, rangeB.to, customPaths, clientFilter);
 
     const validA = resultsA.filter((r) => r.stats && !r.stats.encrypted);
     const validB = resultsB.filter((r) => r.stats && !r.stats.encrypted);

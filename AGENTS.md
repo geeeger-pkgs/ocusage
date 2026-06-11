@@ -51,7 +51,6 @@ node cli.mjs config --reset      # clear all custom paths
 ## Architecture
 
 - **cli.mjs** — entrypoint, arg parsing
-- **multi.mjs** — multi-client orchestration layer
 - **providers/** — pluggable provider system
   - **base.mjs** — shared types and utilities
   - **opencode.mjs** — OpenCode SQLite provider

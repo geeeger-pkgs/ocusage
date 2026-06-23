@@ -156,7 +156,7 @@ function aggregateMessages(rows) {
     const outputTokens = tu.completion_tokens || 0;
     const cacheRead = tu.cache_read_input_tokens || 0;
     const cacheWrite = tu.cache_creation_input_tokens || 0;
-    const totalTokens = tu.total_tokens || inputTokens + outputTokens;
+    const totalTokens = tu.total_tokens + cacheRead + cacheWrite;
 
     // Skip rows with no actual usage
     if (inputTokens === 0 && outputTokens === 0) continue;

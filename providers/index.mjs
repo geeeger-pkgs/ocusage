@@ -16,6 +16,7 @@ import * as qoder from "./qoder.mjs";
 import * as qoderCli from "./qoder-cli.mjs";
 import * as trae from "./trae.mjs";
 import * as traeSolo from "./trae-solo.mjs";
+import * as workbuddy from "./workbuddy.mjs";
 
 const PROVIDERS = [
   { id: opencode.id, name: opencode.name, module: opencode },
@@ -26,6 +27,7 @@ const PROVIDERS = [
   { id: codewhale.id, name: codewhale.name, module: codewhale },
   { id: trae.id, name: trae.name, module: trae },
   { id: traeSolo.id, name: traeSolo.name, module: traeSolo },
+  { id: workbuddy.id, name: workbuddy.name, module: workbuddy },
 ];
 
 /**

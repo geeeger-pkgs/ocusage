@@ -210,6 +210,7 @@ const CLIENT_COLORS = {
   codewhale: chalk.hex("#FFA500"),
   trae: chalk.red,
   "trae-solo": chalk.redBright,
+  workbuddy: chalk.cyan,
 };
 const DEFAULT_CLIENT_COLOR = chalk.yellow;
 

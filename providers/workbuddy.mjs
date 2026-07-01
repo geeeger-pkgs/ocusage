@@ -26,7 +26,6 @@ import { DatabaseSync } from "node:sqlite";
 import { EMPTY_STAT, validateDate } from "./base.mjs";
 
 const DEFAULT_WORKBUDDY_DIR = join(homedir(), ".workbuddy");
-const DEFAULT_DB_PATH = join(DEFAULT_WORKBUDDY_DIR, "workbuddy.db");
 const MODELS_JSON = join(DEFAULT_WORKBUDDY_DIR, "models.json");
 
 /**
@@ -133,8 +132,8 @@ function msToUTCDate(ms) {
  * Convert a date string to start/end Unix ms for SQLite queries.
  */
 function dateToMsRange(dateStr) {
-  const start = new Date(dateStr + "T00:00:00.000Z").getTime();
-  const end = new Date(dateStr + "T23:59:59.999Z").getTime();
+  const start = new Date(`${dateStr}T00:00:00.000Z`).getTime();
+  const end = new Date(`${dateStr}T23:59:59.999Z`).getTime();
   return { start, end };
 }
 
@@ -301,8 +300,7 @@ function aggregateFromFiles(files, startDate, endDate) {
         rawUsage.prompt_tokens_details?.cached_tokens ||
         rawUsage.cache_read_input_tokens ||
         0;
-      const cacheWrite =
-        rawUsage.cache_creation_input_tokens || 0;
+      const cacheWrite = rawUsage.cache_creation_input_tokens || 0;
       const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
 
       total.requests++;

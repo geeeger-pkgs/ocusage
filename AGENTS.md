@@ -22,6 +22,7 @@ node cli.mjs --client trae       # Trae IDE only
 node cli.mjs --client trae-solo   # Trae Solo only
 node cli.mjs --client qoder-cli  # Qoder CLI only
 node cli.mjs --client workbuddy  # WorkBuddy only
+node cli.mjs --client codex      # Codex only
 node cli.mjs --client opencode,qoder  # multiple clients
 
 # Detect installed AI clients
@@ -49,6 +50,7 @@ node cli.mjs config --reset      # clear all custom paths
 | Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 decryption (Windows) |
 | Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ Encrypted DB — key not extractable |
 | WorkBuddy | `~/.workbuddy/projects/**/*.jsonl` + `~/.workbuddy/workbuddy.db` | JSONL + SQLite | ✅ Full support |
+| Codex | `~/.codex/sessions/**/*.jsonl` | JSONL | ✅ Full support |
 
 ## Architecture
 
@@ -64,6 +66,7 @@ node cli.mjs config --reset      # clear all custom paths
   - **trae.mjs** — Trae IDE (SQLCipher, detect + graceful degradation)
   - **trae-solo.mjs** — Trae Solo (SQLCipher, detect + graceful degradation)
   - **workbuddy.mjs** — WorkBuddy JSONL provider
+  - **codex.mjs** — Codex JSONL provider
   - **index.mjs** — provider registry and auto-detection
 - **config.mjs** — persistent configuration management (custom paths per provider)
 - **report.mjs** — formats and prints results as CLI tables or JSON
@@ -81,6 +84,7 @@ node cli.mjs config --reset      # clear all custom paths
 - Trae database is SQLCipher 4 encrypted — decrypted via key extraction from process memory (Windows only)
 - Trae Solo database is SQLCipher encrypted — key randomly generated, not stored in memory, cannot be extracted
 - WorkBuddy parses JSONL files from `~/.workbuddy/projects/` (primary) with SQLite fallback from `~/.workbuddy/workbuddy.db`; provider names extracted from `~/.workbuddy/models.json` URLs
+- Codex parses JSONL rollout files from `~/.codex/sessions/<YYYY>/<MM>/<DD>/`; model from `config.toml`
 - Node >= 22.5.0 required
 - Tests: `npm test` · Lint: `npm run lint` · CI: GitHub Actions (`.github/workflows/ci.yml`)
 - UI strings are in Chinese (表头、分隔符等)

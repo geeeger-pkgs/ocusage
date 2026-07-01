@@ -35,6 +35,7 @@ node cli.mjs
 | Trae | `%APPDATA%/Trae/ModularData/ai-agent/database.db` | SQLCipher | ✅ SQLCipher 4 解密（Windows）/ Decryption (Windows) |
 | Trae Solo | `%APPDATA%/TRAE SOLO/ModularData/ai-agent/database.db` | SQLCipher | ⚠️ 加密数据库，密钥不可提取 / Encrypted, key not extractable |
 | WorkBuddy | `~/.workbuddy/projects/**/*.jsonl` + `~/.workbuddy/workbuddy.db` | JSONL + SQLite | ✅ 完整支持 / Full support |
+| Codex | `~/.codex/sessions/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
 
 ## 使用 / Usage
 
@@ -172,6 +173,7 @@ providers/    — 可插拔 Provider 系统 / Pluggable provider system
   trae.mjs       — Trae IDE (SQLCipher, 仅检测 / detect only)
   trae-solo.mjs  — Trae Solo (SQLCipher, 仅检测 / detect only)
   workbuddy.mjs  — WorkBuddy JSONL provider
+  codex.mjs      — Codex JSONL provider
   index.mjs      — Provider 注册表与自动检测 / Provider registry and auto-detection
 ```
 

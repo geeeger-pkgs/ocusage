@@ -179,10 +179,13 @@ function aggregateMessages(rows) {
       projectName = row.session_title;
     }
 
+    // Count tool calls from history_v2 data if available
+    const toolCalls = row._toolCalls || 0;
+
     total.requests++;
     total.inputTokens += inputTokens;
     total.outputTokens += outputTokens;
-    total.toolCalls += 0;
+    total.toolCalls += toolCalls;
     total.cacheRead += cacheRead;
     total.cacheWrite += cacheWrite;
     total.totalTokens += totalTokens;
@@ -197,7 +200,7 @@ function aggregateMessages(rows) {
       s.requests++;
       s.inputTokens += inputTokens;
       s.outputTokens += outputTokens;
-      s.toolCalls += 0;
+      s.toolCalls += toolCalls;
       s.cacheRead += cacheRead;
       s.cacheWrite += cacheWrite;
       s.totalTokens += totalTokens;
@@ -209,17 +212,60 @@ function aggregateMessages(rows) {
 function queryRange(db, startSec, endSec) {
   // Trae uses created_at as Unix SECONDS (not milliseconds)
   // Use absolute_path from project table, fallback to session_title
-  return db
+  const rows = db
     .prepare(
       `SELECT ct.context,
               p.absolute_path AS project_path,
-              cs.session_title AS session_title
+              cs.session_title AS session_title,
+              ct.session_id
      FROM chat_turn ct
      LEFT JOIN chat_session cs ON ct.session_id = cs.session_id
      LEFT JOIN project p ON cs.project_id = p.project_id
      WHERE ct.created_at >= ? AND ct.created_at <= ?`,
     )
     .all(startSec, endSec);
+
+  // Count tool calls from history_v2 grouped by session_id
+  try {
+    const sessionToolCalls = new Map(); // session_id -> count
+    const historyRows = db
+      .prepare(
+        `SELECT h.session_id, h.messages
+       FROM history_v2 h
+       WHERE h.created_at >= ? AND h.created_at <= ?
+       AND h.messages IS NOT NULL`,
+      )
+      .all(startSec, endSec);
+
+    for (const hRow of historyRows) {
+      try {
+        const msgs = JSON.parse(hRow.messages);
+        if (msgs.raw_messages) {
+          let count = 0;
+          for (const m of msgs.raw_messages) {
+            if (m.tool_calls && Array.isArray(m.tool_calls)) {
+              count += m.tool_calls.length;
+            }
+          }
+          if (count > 0) {
+            const prev = sessionToolCalls.get(hRow.session_id) || 0;
+            sessionToolCalls.set(hRow.session_id, prev + count);
+          }
+        }
+      } catch {
+        // skip malformed JSON
+      }
+    }
+
+    // Attach tool call counts to rows by session_id
+    for (const row of rows) {
+      row._toolCalls = sessionToolCalls.get(row.session_id) || 0;
+    }
+  } catch {
+    // history_v2 table might not exist in older versions
+  }
+
+  return rows;
 }
 
 export function getDailyStats(dbPath, dateStr) {

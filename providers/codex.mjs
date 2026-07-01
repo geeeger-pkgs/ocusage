@@ -110,6 +110,7 @@ function parseRolloutFile(file) {
   let cwd = "(unknown)";
   let lastTokenUsage = null;
   let toolCalls = 0;
+  let requestCount = 0;
   let timestamp = null;
 
   for (const line of lines) {
@@ -130,8 +131,9 @@ function parseRolloutFile(file) {
       timestamp = event.timestamp;
     }
 
-    // Extract last token_count (cumulative totals)
+    // Count token_count events as requests (each is a turn/response)
     if (event.type === "event_msg" && event.payload?.type === "token_count") {
+      requestCount++;
       lastTokenUsage = event.payload.info?.total_token_usage;
       if (!timestamp) timestamp = event.timestamp;
     }
@@ -148,6 +150,7 @@ function parseRolloutFile(file) {
     model,
     cwd,
     toolCalls,
+    requestCount,
     timestamp,
     usage: lastTokenUsage,
   };
@@ -174,7 +177,7 @@ function aggregateFromFiles(files, startDate, endDate) {
     const outputTokens = result.usage.output_tokens || 0;
     const cacheRead = result.usage.cached_input_tokens || 0;
     const cacheWrite = 0; // Codex doesn't expose cache write separately
-    const totalTokens = inputTokens + outputTokens;
+    const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
 
     // Model name — use config.toml fallback if session_meta doesn't have it
     const rawModel = result.model === "unknown" ? getModelFromConfig() : result.model;
@@ -189,7 +192,7 @@ function aggregateFromFiles(files, startDate, endDate) {
       projectName = lastSlash !== -1 ? cwdParts.slice(lastSlash + 1) : cwdParts;
     }
 
-    total.requests++;
+    total.requests += result.requestCount;
     total.inputTokens += inputTokens;
     total.outputTokens += outputTokens;
     total.toolCalls += result.toolCalls;
@@ -204,7 +207,7 @@ function aggregateFromFiles(files, startDate, endDate) {
     ]) {
       if (!map.has(key)) map.set(key, EMPTY_STAT());
       const s = map.get(key);
-      s.requests++;
+      s.requests += result.requestCount;
       s.inputTokens += inputTokens;
       s.outputTokens += outputTokens;
       s.toolCalls += result.toolCalls;

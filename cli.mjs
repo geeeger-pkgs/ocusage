@@ -29,7 +29,7 @@ program
   .option("--db <path>", "custom database/data path (single client mode only)")
   .option(
     "-c, --client <names>",
-    "client filter: opencode,mimocode,qoder,qoder-cli,claude,codewhale,trae,trae-solo,workbuddy or 'all'",
+    "client filter: opencode,mimocode,qoder,qoder-cli,claude,codewhale,trae,trae-solo,workbuddy,codex or 'all'",
   )
   .option("-f, --format <type>", "output format: table, json, csv, markdown", "table")
   .option("-j, --json", "output as JSON (alias for --format json)")
@@ -177,7 +177,7 @@ program
   .option("--db <path>", "custom database/data path (single client mode only)")
   .option(
     "-c, --client <names>",
-    "client filter: opencode,mimocode,qoder,qoder-cli,claude,codewhale,trae,trae-solo,workbuddy or 'all'",
+    "client filter: opencode,mimocode,qoder,qoder-cli,claude,codewhale,trae,trae-solo,workbuddy,codex or 'all'",
   )
   .option("-f, --format <type>", "output format: table, json, csv, markdown", "table")
   .option("-j, --json", "output as JSON (alias for --format json)")

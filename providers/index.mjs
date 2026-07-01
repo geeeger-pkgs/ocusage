@@ -10,6 +10,7 @@
 import { addStat, EMPTY_STAT } from "./base.mjs";
 import * as claude from "./claude.mjs";
 import * as codewhale from "./codewhale.mjs";
+import * as codex from "./codex.mjs";
 import * as mimocode from "./mimocode.mjs";
 import * as opencode from "./opencode.mjs";
 import * as qoder from "./qoder.mjs";
@@ -28,6 +29,7 @@ const PROVIDERS = [
   { id: trae.id, name: trae.name, module: trae },
   { id: traeSolo.id, name: traeSolo.name, module: traeSolo },
   { id: workbuddy.id, name: workbuddy.name, module: workbuddy },
+  { id: codex.id, name: codex.name, module: codex },
 ];
 
 /**

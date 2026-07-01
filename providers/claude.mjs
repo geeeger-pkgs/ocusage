@@ -261,10 +261,19 @@ function aggregateFromFiles(files, startDate, endDate) {
         projectName = lastSlash !== -1 ? cwdParts.slice(lastSlash + 1) : cwdParts;
       }
 
+      // Count tool_use blocks in assistant message content
+      let toolCalls = 0;
+      const content = event.message?.content;
+      if (Array.isArray(content)) {
+        for (const block of content) {
+          if (block.type === "tool_use") toolCalls++;
+        }
+      }
+
       total.requests++;
       total.inputTokens += inputTokens;
       total.outputTokens += outputTokens;
-      total.toolCalls += 0; // Counted separately from tool events, but hard to parse from this format
+      total.toolCalls += toolCalls;
       total.cacheRead += cacheRead;
       total.cacheWrite += cacheWrite;
       total.totalTokens += totalTokens;
@@ -279,7 +288,7 @@ function aggregateFromFiles(files, startDate, endDate) {
         s.requests++;
         s.inputTokens += inputTokens;
         s.outputTokens += outputTokens;
-        s.toolCalls += 0;
+        s.toolCalls += toolCalls;
         s.cacheRead += cacheRead;
         s.cacheWrite += cacheWrite;
         s.totalTokens += totalTokens;

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.6.1...v3.7.0) (2026-07-01)
+
+
+### Features
+
+* add WorkBuddy provider for AI client usage tracking ([4aca1da](https://github.com/geeeger-pkgs/ocusage/commit/4aca1daf1190c77b0d39261c09e3e0e783ebe2dd))
+
+
+### Bug Fixes
+
+* resolve lint errors in WorkBuddy provider ([c5cfc17](https://github.com/geeeger-pkgs/ocusage/commit/c5cfc171f4c4d4ece54e54d44059ce0818525720))
+
 ## [3.6.1](https://github.com/geeeger-pkgs/ocusage/compare/v3.6.0...v3.6.1) (2026-06-23)
 
 

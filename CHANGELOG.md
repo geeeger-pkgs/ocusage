@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.7.0...v3.8.0) (2026-07-01)
+
+
+### Features
+
+* add Codex provider for OpenAI Codex usage tracking ([5d042c3](https://github.com/geeeger-pkgs/ocusage/commit/5d042c3fb41fd815faeb554cc33d5eb3fcbf5641))
+
+
+### Bug Fixes
+
+* count token_count events as requests and include cacheRead in totalTokens for Codex ([9e31657](https://github.com/geeeger-pkgs/ocusage/commit/9e316570bd24dc8dd3715b3252954bb66b33b26c))
+* count tool calls in Trae provider from history_v2 table ([652634a](https://github.com/geeeger-pkgs/ocusage/commit/652634acb2077f6526b0e9edd6134999a1c5ac7e))
+* count tool_use blocks in Claude Code provider ([010e3a0](https://github.com/geeeger-pkgs/ocusage/commit/010e3a033299d66f4ef7154034ff74dda14baa27))
+
 ## [3.7.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.6.1...v3.7.0) (2026-07-01)
 
 

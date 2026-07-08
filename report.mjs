@@ -211,6 +211,7 @@ const CLIENT_COLORS = {
   trae: chalk.red,
   "trae-solo": chalk.redBright,
   workbuddy: chalk.cyan,
+  zcode: chalk.hex("#B19CD9"),
   codex: chalk.hex("#FF6B6B"),
 };
 const DEFAULT_CLIENT_COLOR = chalk.yellow;

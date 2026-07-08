@@ -156,7 +156,7 @@ export function aggregateRows(rows) {
     const outputTokens = tokens.output || 0;
     const cacheRead = tokens.cache?.read || 0;
     const cacheWrite = tokens.cache?.write || 0;
-    const totalTokens = tokens.total || 0;
+    const totalTokens = tokens.total || inputTokens + outputTokens + cacheRead + cacheWrite;
     const modelID = data.modelID || "unknown";
     const providerID = data.providerID || "unknown";
     const projectName = msg.directory ? basename(msg.directory) : "(global)";

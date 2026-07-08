@@ -28,6 +28,7 @@ node cli.mjs
 |------|---------|------|------|
 | OpenCode | `~/.local/share/opencode/opencode.db` | SQLite | ✅ 完整支持 / Full support |
 | MiMoCode | `~/.local/share/mimocode/mimocode.db` | SQLite | ✅ 完整支持 / Full support |
+| ZCode | `~/.zcode/cli/db/db.sqlite` | SQLite | ✅ 完整支持 / Full support |
 | Qoder | `%APPDATA%/Qoder/SharedClientCache/cache/db/local.db` | SQLite | ✅ 完整支持 / Full support |
 | Claude Code | `~/.claude/projects/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
 | Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ 完整支持 / Full support |
@@ -91,6 +92,7 @@ Use `-c/--client` to query one or multiple AI clients:
 ocusage -c all              # 所有检测到的客户端 / All detected clients
 ocusage -c opencode         # 仅 OpenCode / OpenCode only
 ocusage -c mimocode         # 仅 MiMoCode / MiMoCode only
+ocusage -c zcode            # 仅 ZCode / ZCode only
 ocusage -c qoder            # 仅 Qoder / Qoder only
 ocusage -c claude           # 仅 Claude Code / Claude Code only
 ocusage -c qoder-cli        # 仅 Qoder CLI / Qoder CLI only
@@ -166,6 +168,7 @@ providers/    — 可插拔 Provider 系统 / Pluggable provider system
   base.mjs       — 基础类型和工具 / Shared types and utilities
   opencode.mjs   — OpenCode SQLite provider
   mimocode.mjs   — MiMoCode SQLite provider
+  zcode.mjs      — ZCode SQLite provider
   qoder.mjs      — Qoder SQLite provider
   claude.mjs     — Claude Code JSONL provider
   qoder-cli.mjs  — Qoder CLI JSONL provider

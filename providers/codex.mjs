@@ -177,7 +177,8 @@ function aggregateFromFiles(files, startDate, endDate) {
     const outputTokens = result.usage.output_tokens || 0;
     const cacheRead = result.usage.cached_input_tokens || 0;
     const cacheWrite = 0; // Codex doesn't expose cache write separately
-    const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
+    // cached_input_tokens is a subset of input_tokens, don't double-add
+    const totalTokens = result.usage.total_tokens || inputTokens + outputTokens;
 
     // Model name — use config.toml fallback if session_meta doesn't have it
     const rawModel = result.model === "unknown" ? getModelFromConfig() : result.model;

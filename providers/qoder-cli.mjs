@@ -177,6 +177,7 @@ function aggregateFromFiles(fileEntries, startDate, endDate) {
       const outputTokens = event.data.output_tokens || 0;
       const cacheRead = event.data.cache_read_input_tokens || 0;
       const cacheWrite = event.data.cache_creation_input_tokens || 0;
+      // Anthropic: cache fields are separate from input_tokens (additive)
       const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
       const modelKey = `${event.data.model || "unknown"} (qoder-cli)`;
       lastModelKey = modelKey;

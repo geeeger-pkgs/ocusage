@@ -23,6 +23,7 @@ node cli.mjs --client trae-solo   # Trae Solo only
 node cli.mjs --client qoder-cli  # Qoder CLI only
 node cli.mjs --client workbuddy  # WorkBuddy only
 node cli.mjs --client codex      # Codex only
+node cli.mjs --client zcode      # ZCode only
 node cli.mjs --client opencode,qoder  # multiple clients
 
 # Detect installed AI clients
@@ -43,6 +44,7 @@ node cli.mjs config --reset      # clear all custom paths
 |--------|-------------|--------|--------|
 | OpenCode | `~/.local/share/opencode/opencode.db` | SQLite | ✅ Full support |
 | MiMoCode | `~/.local/share/mimocode/mimocode.db` | SQLite | ✅ Full support |
+| ZCode | `~/.zcode/cli/db/db.sqlite` | SQLite | ✅ Full support |
 | Qoder | `%APPDATA%/Qoder/SharedClientCache/cache/db/local.db` | SQLite | ✅ Full support |
 | Claude Code | `~/.claude/projects/**/*.jsonl` | JSONL | ✅ Full support |
 | Qoder CLI | `~/.qoder/logs/sessions/**/*.jsonl` | JSONL | ✅ Full support |
@@ -59,6 +61,7 @@ node cli.mjs config --reset      # clear all custom paths
   - **base.mjs** — shared types and utilities
   - **opencode.mjs** — OpenCode SQLite provider
   - **mimocode.mjs** — MiMoCode SQLite provider
+  - **zcode.mjs** — Zcode SQLite provider
   - **qoder.mjs** — Qoder SQLite provider
   - **claude.mjs** — Claude Code JSONL provider
   - **codewhale.mjs** — CodeWhale JSON session provider
@@ -77,6 +80,7 @@ node cli.mjs config --reset      # clear all custom paths
 - Reads AI client databases/files directly; they must already exist
 - OpenCode uses `node:sqlite` (Node.js built-in) — zero external dependencies
 - MiMoCode uses the same `node:sqlite` for its SQLite database
+- ZCode uses the same `node:sqlite` for its SQLite database
 - Qoder uses the same `node:sqlite` for its SQLite database
 - Claude Code parses JSONL files from the filesystem
 - Qoder CLI parses session JSONL files from the filesystem

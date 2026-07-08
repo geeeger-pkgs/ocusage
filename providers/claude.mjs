@@ -249,7 +249,7 @@ function aggregateFromFiles(files, startDate, endDate) {
       const outputTokens = usage.output_tokens || 0;
       const cacheRead = usage.cache_read_input_tokens || 0;
       const cacheWrite = usage.cache_creation_input_tokens || 0;
-      // totalTokens includes cache read/write to match OpenCode's convention
+      // Anthropic: cache fields are separate from input_tokens (additive)
       const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
       const modelKey = `${event.message.model || "unknown"} (${resolveProvider()})`;
 

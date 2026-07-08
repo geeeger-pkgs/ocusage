@@ -290,18 +290,22 @@ function aggregateFromFiles(files, startDate, endDate) {
 
       const usage = event.providerData.usage;
       const rawUsage = event.providerData.rawUsage || {};
-      const inputTokens = usage.inputTokens || 0;
-      const outputTokens = usage.outputTokens || 0;
+      const inputTokens = usage.inputTokens || rawUsage.prompt_tokens || 0;
+      const outputTokens = usage.outputTokens || rawUsage.completion_tokens || 0;
       if (inputTokens === 0 && outputTokens === 0) continue;
 
       // Cache: read from inputTokensDetails or rawUsage
+      // New WorkBuddy (≥2026-07) removed cache_read_input_tokens and
+      // cache_creation_input_tokens; cached_tokens moved to prompt_tokens_details.
       const cacheRead =
         usage.inputTokensDetails?.[0]?.cached_tokens ||
         rawUsage.prompt_tokens_details?.cached_tokens ||
         rawUsage.cache_read_input_tokens ||
         0;
       const cacheWrite = rawUsage.cache_creation_input_tokens || 0;
-      const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
+      // New WorkBuddy provides rawUsage.total_tokens (correct total).
+      // Old format: cache fields are additive (Anthropic convention).
+      const totalTokens = rawUsage.total_tokens || inputTokens + outputTokens + cacheRead + cacheWrite;
 
       total.requests++;
       total.inputTokens += inputTokens;

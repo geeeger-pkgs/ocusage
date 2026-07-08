@@ -18,10 +18,12 @@ import * as qoderCli from "./qoder-cli.mjs";
 import * as trae from "./trae.mjs";
 import * as traeSolo from "./trae-solo.mjs";
 import * as workbuddy from "./workbuddy.mjs";
+import * as zcode from "./zcode.mjs";
 
 const PROVIDERS = [
   { id: opencode.id, name: opencode.name, module: opencode },
   { id: mimocode.id, name: mimocode.name, module: mimocode },
+  { id: zcode.id, name: zcode.name, module: zcode },
   { id: qoder.id, name: qoder.name, module: qoder },
   { id: qoderCli.id, name: qoderCli.name, module: qoderCli },
   { id: claude.id, name: claude.name, module: claude },

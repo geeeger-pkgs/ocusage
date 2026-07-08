@@ -121,7 +121,7 @@ describe("Qoder getDailyStats", () => {
     assert.equal(result.total.requests, 2);
     assert.equal(result.total.inputTokens, 3000); // 1000+2000
     assert.equal(result.total.outputTokens, 1500); // 500+1000
-    assert.equal(result.total.totalTokens, 4700); // 1000+500+200+2000+1000+0+0 (includes cacheRead)
+    assert.equal(result.total.totalTokens, 4500); // inputTokens(3000) + outputTokens(1500), cache is subset of input
     assert.equal(result.total.cacheRead, 200);
   });
 
@@ -149,7 +149,7 @@ describe("Qoder getDailyStats", () => {
     assert.ok(result.byModel.has(modelKey));
     const m = result.byModel.get(modelKey);
     assert.equal(m.requests, 2);
-    assert.equal(m.totalTokens, 4700); // includes cacheRead
+    assert.equal(m.totalTokens, 4500); // cache is subset of input, not additive
   });
 
   it("groups by project", () => {

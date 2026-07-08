@@ -78,7 +78,8 @@ function aggregateMessages(rows) {
     const outputTokens = tokenInfo.completion_tokens || 0;
     const cacheRead = tokenInfo.cached_tokens || 0;
     const cacheWrite = 0;
-    const totalTokens = inputTokens + outputTokens + cacheRead + cacheWrite;
+    // cached_tokens is a subset of prompt_tokens, don't double-add
+    const totalTokens = inputTokens + outputTokens;
     const modelKey = `${modelInfo?.model_key || "unknown"} (qoder)`;
     const projectName = row.project_uri ? basename(row.project_uri) : "(global)";
     lastModelKey = modelKey;

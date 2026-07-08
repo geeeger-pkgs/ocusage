@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.8.0...v3.9.0) (2026-07-08)
+
+
+### Features
+
+* add ZCode provider and fix cache token double-counting ([132c32f](https://github.com/geeeger-pkgs/ocusage/commit/132c32f3c581d55ea6dc09e98d5c6207f3d15bc1))
+
 ## [3.8.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.7.0...v3.8.0) (2026-07-01)
 
 

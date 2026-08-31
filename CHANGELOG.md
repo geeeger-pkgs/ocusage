@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.9.0...v3.10.0) (2026-08-31)
+
+
+### Features
+
+* add dsh provider ([638c678](https://github.com/geeeger-pkgs/ocusage/commit/638c6781713712d823f822646881f66ee190584b))
+
 ## [3.9.0](https://github.com/geeeger-pkgs/ocusage/compare/v3.8.0...v3.9.0) (2026-07-08)
 
 

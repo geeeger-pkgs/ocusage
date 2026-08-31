@@ -11,6 +11,7 @@ import { addStat, EMPTY_STAT } from "./base.mjs";
 import * as claude from "./claude.mjs";
 import * as codewhale from "./codewhale.mjs";
 import * as codex from "./codex.mjs";
+import * as deepseekHarness from "./deepseek-harness.mjs";
 import * as mimocode from "./mimocode.mjs";
 import * as opencode from "./opencode.mjs";
 import * as qoder from "./qoder.mjs";
@@ -32,6 +33,7 @@ const PROVIDERS = [
   { id: traeSolo.id, name: traeSolo.name, module: traeSolo },
   { id: workbuddy.id, name: workbuddy.name, module: workbuddy },
   { id: codex.id, name: codex.name, module: codex },
+  { id: deepseekHarness.id, name: deepseekHarness.name, module: deepseekHarness },
 ];
 
 /**

@@ -12,9 +12,9 @@
  * Data path: ~/.dsh/sessions/<normalized-cwd>/<session-id>/session.jsonl[.zstd]
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { closeSync, existsSync, openSync, readdirSync, readFileSync, readSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import * as fzstd from "fzstd";
 import { EMPTY_STAT, validateDate } from "./base.mjs";
 
@@ -71,7 +71,27 @@ function findJsonlFiles(dir) {
   } catch {
     // Permission issues, etc. — skip
   }
-  return results;
+  const byDir = new Map();
+  for (const f of results) {
+    const parent = dirname(f.path);
+    if (!byDir.has(parent)) byDir.set(parent, []);
+    byDir.get(parent).push(f);
+  }
+  const deduped = [];
+  for (const filesInDir of byDir.values()) {
+    const withGen = filesInDir.map((f) => ({ ...f, gen: parseGeneration(basename(f.path)) }));
+    const maxGen = Math.max(...withGen.map((f) => f.gen));
+    for (const f of withGen) {
+      if (f.gen === -1 || f.gen === maxGen) deduped.push({ path: f.path, compressed: f.compressed });
+    }
+  }
+  return deduped;
+}
+
+function parseGeneration(fileName) {
+  const m = /^session(?:\.v(\d+))?\.jsonl(?:\.zstd)?$/.exec(fileName);
+  if (!m) return -1;
+  return m[1] ? Number(m[1]) : 0;
 }
 
 /**
@@ -91,23 +111,67 @@ function readJsonlFile(fileInfo) {
 }
 
 /**
- * Get the modification date of a file as YYYY-MM-DD string.
- */
-function getFileModifiedDate(filePath) {
-  try {
-    const stats = statSync(filePath);
-    return stats.mtime.toISOString().slice(0, 10);
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Parse a Unix epoch milliseconds timestamp and return UTC date string (YYYY-MM-DD).
  */
 function epochToUTCDate(epochMs) {
   const d = new Date(epochMs);
   return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Get the modification date of a file as a UTC YYYY-MM-DD string.
+ * Sound skip: the log is append-only, so all events were written no later
+ * than the file's mtime — an mtime before the range start means no event
+ * can fall inside the range.
+ */
+function getFileModifiedDate(filePath) {
+  try {
+    return statSync(filePath).mtime.toISOString().slice(0, 10);
+  } catch {
+    return null;
+  }
+}
+
+const HEADER_PREFIX_BYTES = 32 * 1024;
+
+/**
+ * Read the session header (first log line) and return the UTC date of its
+ * createdAt timestamp. Only a small prefix of the file is read/decompressed.
+ * Sound skip: every event is appended after session creation, so a header
+ * created after the range end means the file has no in-range events.
+ * Returns null when the header cannot be read — callers then scan the file.
+ */
+function getSessionCreatedDate(fileInfo) {
+  try {
+    let bytes;
+    const buffer = Buffer.alloc(HEADER_PREFIX_BYTES);
+    const fd = openSync(fileInfo.path, "r");
+    try {
+      bytes = readSync(fd, buffer, 0, HEADER_PREFIX_BYTES, 0);
+    } finally {
+      closeSync(fd);
+    }
+
+    let text;
+    if (fileInfo.compressed) {
+      const chunks = [];
+      const decoder = new fzstd.Decompress((chunk) => chunks.push(chunk));
+      decoder.push(new Uint8Array(buffer.subarray(0, bytes)), false);
+      if (chunks.length === 0) return null;
+      text = new TextDecoder().decode(Buffer.concat(chunks));
+    } else {
+      text = buffer.toString("utf-8", 0, bytes);
+    }
+
+    const newlineIdx = text.indexOf("\n");
+    if (newlineIdx === -1) return null;
+
+    const header = JSON.parse(text.slice(0, newlineIdx));
+    if (header.type !== "session" || typeof header.createdAt !== "number") return null;
+    return epochToUTCDate(header.createdAt);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -139,16 +203,14 @@ function aggregateFromFiles(files, startDate, endDate) {
   const byProject = new Map();
   const byProvider = new Map();
 
-  // Track tool calls per message (assistant/message seq -> tool call count)
-  const toolCallCounts = new Map();
-
   for (const fileInfo of files) {
-    // Quick filter: skip files whose modification date is outside the query range
-    // This avoids expensive zstd decompression for old files
-    const fileModifiedDate = getFileModifiedDate(fileInfo.path);
-    if (fileModifiedDate && (fileModifiedDate < startDate || fileModifiedDate > endDate)) {
-      continue;
-    }
+    // Quick, sound filters to avoid expensive decompression of files that
+    // provably contain no events for the requested range.
+    const modifiedDate = getFileModifiedDate(fileInfo.path);
+    if (modifiedDate && modifiedDate < startDate) continue;
+
+    const createdDate = getSessionCreatedDate(fileInfo);
+    if (createdDate && createdDate > endDate) continue;
 
     const projectName = extractProjectName(fileInfo.path);
 
@@ -157,7 +219,7 @@ function aggregateFromFiles(files, startDate, endDate) {
 
     const lines = content.split("\n");
 
-    // First pass: count tool/call events per (turn, step)
+    const toolCallCounts = new Map();
     for (const line of lines) {
       if (!line.trim()) continue;
 
@@ -214,7 +276,6 @@ function aggregateFromFiles(files, startDate, endDate) {
       const modelName = provenance.model || source.model || "unknown";
       const modelKey = `${modelName} (${providerName})`;
 
-      // Count tool calls for this (turn, step)
       const stepKey = `${event.data.turn}-${event.data.step}`;
       const toolCalls = toolCallCounts.get(stepKey) || 0;
 
